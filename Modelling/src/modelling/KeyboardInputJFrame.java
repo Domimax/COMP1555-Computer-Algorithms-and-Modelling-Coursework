@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package modelling;
 
 import java.awt.event.ActionEvent;
@@ -117,21 +112,42 @@ public class KeyboardInputJFrame extends JFrame implements ActionListener {
         //Stores the data in the arraylists of the modelling class and deletes 
         //all associations to this form, so that the garbage collector can dispose of it
         if(e.getActionCommand().equals("Submit")){
-            storeData();
+            modelling.storeKeyboardInputData();
             this.setVisible(false);
             modelling.setForm(null);
             modelling = null;
         }
     }
     
-    private void storeData(){   
-        modelling.getNoOfBathroomsX1().add(Float.parseFloat(fieldBathrooms.getText()));
-        modelling.getSiteAreaX2().add(Float.parseFloat(fieldAreaSite.getText()));
-        modelling.getLivingSpaceX3().add(Float.parseFloat(fieldLivingSpace.getText()));
-        modelling.getNoOfGaragesX4().add(Integer.parseInt(fieldGarages.getText()));
-        modelling.getNoOfRoomsX5().add(Integer.parseInt(fieldRooms.getText()));
-        modelling.getNoOfBedroomsX6().add(Integer.parseInt(fieldBedrooms.getText()));
-        modelling.getAgeX7().add(Integer.parseInt(fieldAge.getText()));
-        modelling.getPriceY().add(Float.parseFloat(fieldPrice.getText()));   
+    public JTextField getFieldBathrooms() {
+        return fieldBathrooms;
+    }
+
+    public JTextField getFieldAreaSite() {
+        return fieldAreaSite;
+    }
+
+    public JTextField getFieldLivingSpace() {
+        return fieldLivingSpace;
+    }
+
+    public JTextField getFieldGarages() {
+        return fieldGarages;
+    }
+
+    public JTextField getFieldRooms() {
+        return fieldRooms;
+    }
+
+    public JTextField getFieldBedrooms() {
+        return fieldBedrooms;
+    }
+
+    public JTextField getFieldAge() {
+        return fieldAge;
+    }
+
+    public JTextField getFieldPrice() {
+        return fieldPrice;
     }
 }

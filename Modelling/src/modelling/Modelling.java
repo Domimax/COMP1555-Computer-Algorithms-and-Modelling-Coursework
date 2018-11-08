@@ -5,8 +5,6 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author ms8794c
@@ -44,6 +42,9 @@ public class Modelling implements ActionListener {
         //Called if we want to add data about a property via an external file
         if (e.getActionCommand().equals("File")) {
             System.out.println("This functionality is not coded yet.");
+        }
+        if (e.getActionCommand().equals("Submit")) {
+            System.out.println(priceY.get(0));
         }
     }
 
@@ -88,12 +89,23 @@ public class Modelling implements ActionListener {
 
         mainMenu.setTitle("Coursework");
         mainMenu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+        
         mainMenu.setVisible(true);
     }
 
     private void controller() {
 
+    }
+    
+    public void storeKeyboardInputData(){    
+        noOfBathroomsX1.add(Float.parseFloat(form.getFieldBathrooms().getText()));
+        siteAreaX2.add(Float.parseFloat(form.getFieldAreaSite().getText()));
+        livingSpaceX3.add(Float.parseFloat(form.getFieldLivingSpace().getText()));
+        noOfGaragesX4.add(Integer.parseInt(form.getFieldGarages().getText()));
+        noOfRoomsX5.add(Integer.parseInt(form.getFieldRooms().getText()));
+        noOfBedroomsX6.add(Integer.parseInt(form.getFieldBedrooms().getText()));
+        ageX7.add(Integer.parseInt(form.getFieldAge().getText()));
+        priceY.add(Float.parseFloat(form.getFieldPrice().getText()));
     }
 
     public ArrayList<Float> getNoOfBathroomsX1() {
