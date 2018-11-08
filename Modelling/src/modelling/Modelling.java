@@ -78,8 +78,8 @@ public class Modelling implements ActionListener {
 
         addThroughFile.setText("Read in a file");
         addThroughFile.setFont(fnt);
-         addThroughKeyboard.setActionCommand("File");
-        addThroughKeyboard.addActionListener(this);
+        addThroughFile.setActionCommand("File");
+        addThroughFile.addActionListener(this);
         inputMenu.add(addThroughFile);
 
         mainMenu.setJMenuBar(menuBar);
@@ -126,5 +126,9 @@ public class Modelling implements ActionListener {
     
     public ArrayList<Float> getPriceY() {
         return priceY;
+    }
+
+    public void setForm(KeyboardInputJFrame form) {
+        this.form = form;
     }
 }

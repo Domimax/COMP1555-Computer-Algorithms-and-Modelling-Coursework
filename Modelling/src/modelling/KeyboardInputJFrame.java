@@ -113,9 +113,14 @@ public class KeyboardInputJFrame extends JFrame implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {   
+    public void actionPerformed(ActionEvent e) { 
+        //Stores the data in the arraylists of the modelling class and deletes 
+        //all associations to this form, so that the garbage collector can dispose of it
         if(e.getActionCommand().equals("Submit")){
             storeData();
+            this.setVisible(false);
+            modelling.setForm(null);
+            modelling = null;
         }
     }
     
@@ -127,6 +132,6 @@ public class KeyboardInputJFrame extends JFrame implements ActionListener {
         modelling.getNoOfRoomsX5().add(Integer.parseInt(fieldRooms.getText()));
         modelling.getNoOfBedroomsX6().add(Integer.parseInt(fieldBedrooms.getText()));
         modelling.getAgeX7().add(Integer.parseInt(fieldAge.getText()));
-        modelling.getNoOfBathroomsX1().add(Float.parseFloat(fieldBathrooms.getText()));   
+        modelling.getPriceY().add(Float.parseFloat(fieldPrice.getText()));   
     }
 }
