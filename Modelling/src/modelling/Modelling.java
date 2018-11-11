@@ -13,6 +13,7 @@ import java.util.ArrayList;
 public class Modelling implements ActionListener {
 
     private KeyboardInputJFrame form;
+    private JComboBox xChosen;
 
     private ArrayList<Float> noOfBathroomsX1;
     private ArrayList<Float> siteAreaX2;
@@ -43,9 +44,6 @@ public class Modelling implements ActionListener {
         if (e.getActionCommand().equals("File")) {
             System.out.println("This functionality is not coded yet.");
         }
-        if (e.getActionCommand().equals("Submit")) {
-            System.out.println(priceY.get(0));
-        }
     }
 
     private void model() {
@@ -62,10 +60,11 @@ public class Modelling implements ActionListener {
     // GUI initialisation
     private void view() {
         Font fnt = new Font("Times New Roman", Font.PLAIN, 24);
+
         JFrame mainMenu = new JFrame();
         JMenuBar menuBar = new JMenuBar();
         JMenu inputMenu = new JMenu("Input data");
-
+        xChosen = new JComboBox();
         JMenuItem addThroughKeyboard = new JMenuItem();
         JMenuItem addThroughFile = new JMenuItem();
 
@@ -83,21 +82,35 @@ public class Modelling implements ActionListener {
         addThroughFile.addActionListener(this);
         inputMenu.add(addThroughFile);
 
+        xChosen.setFont(fnt);
+        xChosen.addActionListener(this);
+        xChosen.setActionCommand("IndependentX");
+        xChosen.addItem("Select your independent variable");
+        xChosen.addItem("No. of bathrooms");
+        xChosen.addItem("Site area (1000's square feet)");
+        xChosen.addItem("Living space (1000's square feet)");
+        xChosen.addItem("No. of garages");
+        xChosen.addItem("No. of rooms");
+        xChosen.addItem("No. of bedrooms");
+        xChosen.addItem("Age (years)");
+
         mainMenu.setJMenuBar(menuBar);
         menuBar.add(inputMenu);
+        menuBar.add(xChosen);
+        menuBar.add(xChosen);
         mainMenu.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         mainMenu.setTitle("Coursework");
         mainMenu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
+
         mainMenu.setVisible(true);
     }
 
     private void controller() {
 
     }
-    
-    public void storeKeyboardInputData(){    
+
+    public void storeKeyboardInputData() {
         noOfBathroomsX1.add(Float.parseFloat(form.getFieldBathrooms().getText()));
         siteAreaX2.add(Float.parseFloat(form.getFieldAreaSite().getText()));
         livingSpaceX3.add(Float.parseFloat(form.getFieldLivingSpace().getText()));
@@ -106,38 +119,6 @@ public class Modelling implements ActionListener {
         noOfBedroomsX6.add(Integer.parseInt(form.getFieldBedrooms().getText()));
         ageX7.add(Integer.parseInt(form.getFieldAge().getText()));
         priceY.add(Float.parseFloat(form.getFieldPrice().getText()));
-    }
-
-    public ArrayList<Float> getNoOfBathroomsX1() {
-        return noOfBathroomsX1;
-    }
-
-    public ArrayList<Float> getSiteAreaX2() {
-        return siteAreaX2;
-    }
-
-    public ArrayList<Float> getLivingSpaceX3() {
-        return livingSpaceX3;
-    }
-
-    public ArrayList<Integer> getNoOfGaragesX4() {
-        return noOfGaragesX4;
-    }
-
-    public ArrayList<Integer> getNoOfRoomsX5() {
-        return noOfRoomsX5;
-    }
-
-    public ArrayList<Integer> getNoOfBedroomsX6() {
-        return noOfBedroomsX6;
-    }
-
-    public ArrayList<Integer> getAgeX7() {
-        return ageX7;
-    }
-    
-    public ArrayList<Float> getPriceY() {
-        return priceY;
     }
 
     public void setForm(KeyboardInputJFrame form) {
