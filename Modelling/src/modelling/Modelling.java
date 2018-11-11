@@ -120,38 +120,6 @@ public class Modelling implements ActionListener {
         ageX7.add(Integer.parseInt(form.getFieldAge().getText()));
         priceY.add(Float.parseFloat(form.getFieldPrice().getText()));
     }
-    
-    public ArrayList<Float> getNoOfBathroomsX1() {
-        return noOfBathroomsX1;
-    }
-
-    public ArrayList<Float> getSiteAreaX2() {
-        return siteAreaX2;
-    }
-
-    public ArrayList<Float> getLivingSpaceX3() {
-        return livingSpaceX3;
-    }
-
-    public ArrayList<Integer> getNoOfGaragesX4() {
-        return noOfGaragesX4;
-    }
-
-    public ArrayList<Integer> getNoOfRoomsX5() {
-        return noOfRoomsX5;
-    }
-
-    public ArrayList<Integer> getNoOfBedroomsX6() {
-        return noOfBedroomsX6;
-    }
-
-    public ArrayList<Integer> getAgeX7() {
-        return ageX7;
-    }
-
-    public ArrayList<Float> getPriceY() {
-        return priceY;
-    }
 
     public void setForm(KeyboardInputJFrame form) {
         this.form = form;
