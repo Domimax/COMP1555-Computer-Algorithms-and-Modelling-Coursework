@@ -5,6 +5,12 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.data.xy.XYDataset;
 
 /**
  * @author ms8794c
@@ -12,8 +18,10 @@ import java.util.ArrayList;
  */
 public class Modelling implements ActionListener {
 
+    private JFrame mainMenu;
     private KeyboardInputJFrame form;
     private JComboBox xChosen;
+    private ChartPanel chartDisplay;
 
     private ArrayList<Float> noOfBathroomsX1;
     private ArrayList<Float> siteAreaX2;
@@ -42,7 +50,18 @@ public class Modelling implements ActionListener {
         }
         //Called if we want to add data about a property via an external file
         if (e.getActionCommand().equals("File")) {
-            System.out.println("This functionality is not coded yet.");
+            JOptionPane.showMessageDialog(null, "This functionality is not coded yet.");
+        }
+        //Called if we want to plot a scatter chart.
+        if(e.getActionCommand().equals("ScatterChart")){
+            //For now just a random data set to plot a line chart (not a scatter chart yet.)
+            XYDataset ds = createDataset();
+            JFreeChart chart
+                    = ChartFactory.createXYLineChart("Test Chart",
+                            "x", "y", ds, PlotOrientation.VERTICAL, true, true,
+                            false);
+            chartDisplay.setChart(chart);
+            mainMenu.setVisible(true);
         }
     }
 
@@ -61,14 +80,17 @@ public class Modelling implements ActionListener {
     private void view() {
         Font fnt = new Font("Times New Roman", Font.PLAIN, 24);
 
-        JFrame mainMenu = new JFrame();
+        mainMenu = new JFrame();
+        xChosen = new JComboBox();
         JMenuBar menuBar = new JMenuBar();
         JMenu inputMenu = new JMenu("Input data");
-        xChosen = new JComboBox();
+        JMenu chartMenu = new JMenu("Choose a chart");
         JMenuItem addThroughKeyboard = new JMenuItem();
         JMenuItem addThroughFile = new JMenuItem();
+        JMenuItem plotScatterChart = new JMenuItem();
 
         inputMenu.setFont(fnt);
+        chartMenu.setFont(fnt);
 
         addThroughKeyboard.setText("Enter data through keyboard");
         addThroughKeyboard.setFont(fnt);
@@ -81,6 +103,12 @@ public class Modelling implements ActionListener {
         addThroughFile.setActionCommand("File");
         addThroughFile.addActionListener(this);
         inputMenu.add(addThroughFile);
+        
+        plotScatterChart.setText("Plot a scatter chart");
+        plotScatterChart.setFont(fnt);
+        plotScatterChart.setActionCommand("ScatterChart");
+        plotScatterChart.addActionListener(this);
+        chartMenu.add(plotScatterChart);
 
         xChosen.setFont(fnt);
         xChosen.addActionListener(this);
@@ -93,11 +121,17 @@ public class Modelling implements ActionListener {
         xChosen.addItem("No. of rooms");
         xChosen.addItem("No. of bedrooms");
         xChosen.addItem("Age (years)");
+        
+        JFreeChart freeChart  = ChartFactory.createXYLineChart("Test Chart",
+                            "x", "y", new DefaultXYDataset(), PlotOrientation.VERTICAL, true, true,
+                            false);
+        chartDisplay = new ChartPanel(freeChart);
 
         mainMenu.setJMenuBar(menuBar);
         menuBar.add(inputMenu);
+        menuBar.add(chartMenu);
         menuBar.add(xChosen);
-        menuBar.add(xChosen);
+        mainMenu.add(chartDisplay);
         mainMenu.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         mainMenu.setTitle("Coursework");
@@ -123,5 +157,17 @@ public class Modelling implements ActionListener {
 
     public void setForm(KeyboardInputJFrame form) {
         this.form = form;
+    }
+    
+    //Creation of a random data set
+    private XYDataset createDataset() {
+
+        DefaultXYDataset ds = new DefaultXYDataset();
+
+        double[][] data = {{0.1, 0.2, 0.3}, {1, 2, 3}};
+
+        ds.addSeries("series1", data);
+
+        return ds;
     }
 }
