@@ -26,10 +26,10 @@ public class Modelling implements ActionListener {
     private ArrayList<Float> noOfBathroomsX1;
     private ArrayList<Float> siteAreaX2;
     private ArrayList<Float> livingSpaceX3;
-    private ArrayList<Integer> noOfGaragesX4;
-    private ArrayList<Integer> noOfRoomsX5;
-    private ArrayList<Integer> noOfBedroomsX6;
-    private ArrayList<Integer> ageX7;
+    private ArrayList<Float> noOfGaragesX4;
+    private ArrayList<Float> noOfRoomsX5;
+    private ArrayList<Float> noOfBedroomsX6;
+    private ArrayList<Float> ageX7;
     private ArrayList<Float> priceY;
 
     public static void main(String[] args) {
@@ -148,10 +148,10 @@ public class Modelling implements ActionListener {
         noOfBathroomsX1.add(Float.parseFloat(form.getFieldBathrooms().getText()));
         siteAreaX2.add(Float.parseFloat(form.getFieldAreaSite().getText()));
         livingSpaceX3.add(Float.parseFloat(form.getFieldLivingSpace().getText()));
-        noOfGaragesX4.add(Integer.parseInt(form.getFieldGarages().getText()));
-        noOfRoomsX5.add(Integer.parseInt(form.getFieldRooms().getText()));
-        noOfBedroomsX6.add(Integer.parseInt(form.getFieldBedrooms().getText()));
-        ageX7.add(Integer.parseInt(form.getFieldAge().getText()));
+        noOfGaragesX4.add((float)Integer.parseInt(form.getFieldGarages().getText()));
+        noOfRoomsX5.add((float)Integer.parseInt(form.getFieldRooms().getText()));
+        noOfBedroomsX6.add((float)Integer.parseInt(form.getFieldBedrooms().getText()));
+        ageX7.add((float)Integer.parseInt(form.getFieldAge().getText()));
         priceY.add(Float.parseFloat(form.getFieldPrice().getText()));
     }
 
