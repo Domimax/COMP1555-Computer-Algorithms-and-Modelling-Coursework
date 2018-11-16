@@ -1,0 +1,14 @@
+     //Called if we want to see the Scatter graph data
+        if (e.getActionCommand().equals("ChartData")) {
+         JOptionPane.showMessageDialog(null, " X= {0.1, 0.2, 0.3}, Y = {1, 2, 3}");
+         
+         
+         
+         //Menu Item for scatter graph data
+        showScatterData.setText("Show Scatter chart data");
+        showScatterData.setFont(fnt);
+        showScatterData.setActionCommand("ChartData");
+        showScatterData.addActionListener(this);
+        chartMenu.add(showScatterData);
+        
+     
