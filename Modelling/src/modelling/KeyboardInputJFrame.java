@@ -8,13 +8,13 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 /**
+ * A simple form to read in data through the keyboard.
  *
- * @author Maks Domas Smirnov
+ * @author Maks Domas Smirnov, ID: ms8749c
  */
 public class KeyboardInputJFrame extends JFrame implements ActionListener {
-
     private Modelling modelling;
-    
+
     private JTextField fieldBathrooms;
     private JTextField fieldAreaSite;
     private JTextField fieldLivingSpace;
@@ -23,17 +23,18 @@ public class KeyboardInputJFrame extends JFrame implements ActionListener {
     private JTextField fieldBedrooms;
     private JTextField fieldAge;
     private JTextField fieldPrice;
-    
+
     public KeyboardInputJFrame(Modelling modelling) {
         this.modelling = modelling;
         initialise();
     }
 
+    // GUI initialisation
     private void initialise() {
         this.setTitle("Input data through the keyboard.");
         this.getContentPane().setLayout(null);
         this.setBounds(100, 100, 500, 500);
-        
+
         JLabel labelBathrooms = new JLabel("Number of bathrooms:");
         labelBathrooms.setBounds(50, 25, 200, 25);
         this.getContentPane().add(labelBathrooms);
@@ -61,7 +62,7 @@ public class KeyboardInputJFrame extends JFrame implements ActionListener {
         JLabel labelAge = new JLabel("Age of propery:");
         labelAge.setBounds(50, 175, 200, 25);
         this.getContentPane().add(labelAge);
-               
+
         JLabel labelPrice = new JLabel("Price of the property:");
         labelPrice.setBounds(50, 200, 200, 25);
         this.getContentPane().add(labelPrice);
@@ -93,7 +94,7 @@ public class KeyboardInputJFrame extends JFrame implements ActionListener {
         fieldAge = new JTextField();
         fieldAge.setBounds(300, 175, 100, 25);
         this.getContentPane().add(fieldAge);
-        
+
         fieldPrice = new JTextField();
         fieldPrice.setBounds(300, 200, 100, 25);
         this.getContentPane().add(fieldPrice);
@@ -108,17 +109,17 @@ public class KeyboardInputJFrame extends JFrame implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) { 
+    public void actionPerformed(ActionEvent e) {
         //Stores the data in the arraylists of the modelling class and deletes 
         //all associations to this form, so that the garbage collector can dispose of it
-        if(e.getActionCommand().equals("Submit")){
+        if (e.getActionCommand().equals("Submit")) {
             modelling.storeKeyboardInputData();
             this.setVisible(false);
             modelling.setForm(null);
             modelling = null;
         }
     }
-    
+
     public JTextField getFieldBathrooms() {
         return fieldBathrooms;
     }
