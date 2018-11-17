@@ -4,13 +4,22 @@ import javax.swing.*;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 /**
  * @author ms8794c
@@ -23,6 +32,7 @@ public class Modelling implements ActionListener {
     private JComboBox xChosen;
     private ChartPanel chartDisplay;
 
+    private ArrayList<Float> priceY;
     private ArrayList<Float> noOfBathroomsX1;
     private ArrayList<Float> siteAreaX2;
     private ArrayList<Float> livingSpaceX3;
@@ -30,7 +40,6 @@ public class Modelling implements ActionListener {
     private ArrayList<Float> noOfRoomsX5;
     private ArrayList<Float> noOfBedroomsX6;
     private ArrayList<Float> ageX7;
-    private ArrayList<Float> priceY;
 
     public static void main(String[] args) {
         Modelling application = new Modelling();
@@ -50,22 +59,35 @@ public class Modelling implements ActionListener {
         }
         //Called if we want to add data about a property via an external file
         if (e.getActionCommand().equals("File")) {
-            JOptionPane.showMessageDialog(null, "This functionality is not coded yet.");
+            try {
+                readDataFromFile();
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Modelling.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         //Called if we want to plot a scatter chart.
         if(e.getActionCommand().equals("ScatterChart")){
             //For now just a random data set to plot a line chart (not a scatter chart yet.)
             XYDataset ds = createDataset();
+            
+            XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+            renderer.setSeriesLinesVisible(0, false);
+            renderer.setSeriesShapesVisible(1, true);
+            
             JFreeChart chart
                     = ChartFactory.createXYLineChart("Test Chart",
                             "x", "y", ds, PlotOrientation.VERTICAL, true, true,
                             false);
+            XYPlot plot = (XYPlot)chart.getPlot();
+            plot.setRenderer(renderer);
+
             chartDisplay.setChart(chart);
             mainMenu.setVisible(true);
         }
     }
 
     private void model() {
+        priceY = new ArrayList<>();
         noOfBathroomsX1 = new ArrayList<>();
         siteAreaX2 = new ArrayList<>();
         livingSpaceX3 = new ArrayList<>();
@@ -73,7 +95,6 @@ public class Modelling implements ActionListener {
         noOfRoomsX5 = new ArrayList<>();
         noOfBedroomsX6 = new ArrayList<>();
         ageX7 = new ArrayList<>();
-        priceY = new ArrayList<>();
     }
 
     // GUI initialisation
@@ -163,11 +184,43 @@ public class Modelling implements ActionListener {
     private XYDataset createDataset() {
 
         DefaultXYDataset ds = new DefaultXYDataset();
+        XYSeriesCollection dataset = new XYSeriesCollection();
 
+        XYSeries series = new XYSeries("Series1");
+        for(int i = 0; i < ageX7.size()-1 ;i++){
+            series.add(ageX7.get(i), priceY.get(i));
+        }
         double[][] data = {{0.1, 0.2, 0.3}, {1, 2, 3}};
+        
+        double[][] data1 = {{0.1, 0.3}, {2, 4}};
 
-        ds.addSeries("series1", data);
+        dataset.addSeries(series);
+        
+        ds.addSeries("series2", data1);
 
-        return ds;
+        return dataset;
     }
+    
+    private void readDataFromFile() throws FileNotFoundException {
+         //Reads and stores the text file into an array list
+        Scanner scan = new Scanner(new File("Training Data Set.txt"));
+        ArrayList<String> list = new ArrayList();
+        while (scan.hasNext()) {
+            list.add(scan.nextLine());
+        }
+       // iterative process to store each column into an arrary
+        for (int i = 0; i < list.size()-1; i++) {
+            String[] tmp = new String[8];
+            tmp = list.get(i).split("\t");
+            priceY.add(Float.parseFloat(tmp[1]));
+            noOfBathroomsX1.add(Float.parseFloat(tmp[2]));
+            siteAreaX2.add(Float.parseFloat(tmp[3]));
+            livingSpaceX3.add(Float.parseFloat(tmp[4]));
+            noOfGaragesX4.add((float)Integer.parseInt(tmp[5]));
+            noOfRoomsX5.add((float)Integer.parseInt(tmp[6]));
+            noOfBedroomsX6.add((float)Integer.parseInt(tmp[7]));
+            ageX7.add((float)Integer.parseInt(tmp[8]));
+            System.out.println(ageX7.get(i));
+        }
+     }
 }
