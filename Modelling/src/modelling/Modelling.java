@@ -29,6 +29,7 @@ import org.jfree.data.xy.XYSeriesCollection;
  * @author rn6706a
  */
 public class Modelling implements ActionListener {
+
     private JFrame mainMenu;
     private KeyboardInputJFrame form;
     private JComboBox xChosen;
@@ -73,37 +74,78 @@ public class Modelling implements ActionListener {
             // Check if there is any data at all
             if (!priceY.isEmpty()) {
                 XYDataset ds = createDataset(xChosen.getSelectedIndex());
-                XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-                renderer.setSeriesLinesVisible(0, false);
-                JFreeChart chart
-                        = ChartFactory.createXYLineChart("Your Chart",
-                                "x", "y", ds, PlotOrientation.VERTICAL, true, true,
-                                false);
-                XYPlot plot = (XYPlot) chart.getPlot();
-                plot.setRenderer(renderer);
-                chartDisplay.setChart(chart);
-                mainMenu.setVisible(true);
+                if (ds != null) {
+                    XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+                    renderer.setSeriesLinesVisible(0, false);
+                    JFreeChart chart
+                            = ChartFactory.createXYLineChart("Your Chart",
+                                    xChosen.getSelectedItem().toString(), "Price", ds, PlotOrientation.VERTICAL, true, true,
+                                    false);
+                    XYPlot plot = (XYPlot) chart.getPlot();
+                    plot.setRenderer(renderer);
+                    chartDisplay.setChart(chart);
+                    mainMenu.setVisible(true);
+                }
             } else {
                 JOptionPane.showMessageDialog(null, "Please add data through keyboard or read in a file first.");
             }
         }
         //Called if we want to plot a scatter chart with a regression line.
-        if (e.getActionCommand().equals("ScatterRegressionChart")) {
+        if (e.getActionCommand().equals("RegressionChart")) {
             // Check if there is any data at all
             if (!priceY.isEmpty()) {
                 XYDataset ds = createDatasetRegression(xChosen.getSelectedIndex());
-                XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-                renderer.setSeriesLinesVisible(0, false);
-                renderer.setSeriesShapesVisible(1, false);
-                JFreeChart chart
-                        = ChartFactory.createXYLineChart("Your Chart",
-                                "x", "y", ds, PlotOrientation.VERTICAL, true, true,
-                                false);
-                XYPlot plot = (XYPlot) chart.getPlot();
-                plot.setRenderer(renderer);
+                if (ds != null) {
+                    XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+                    renderer.setSeriesLinesVisible(0, false);
+                    renderer.setSeriesShapesVisible(1, false);
+                    JFreeChart chart
+                            = ChartFactory.createXYLineChart("Your Chart",
+                                    xChosen.getSelectedItem().toString(), "Price", ds, PlotOrientation.VERTICAL, true, true,
+                                    false);
+                    XYPlot plot = (XYPlot) chart.getPlot();
+                    plot.setRenderer(renderer);
 
-                chartDisplay.setChart(chart);
-                mainMenu.setVisible(true);
+                    chartDisplay.setChart(chart);
+                    mainMenu.setVisible(true);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Please add data through keyboard or read in a file first.");
+            }
+        }
+        //Called if we want to plot a scatter chart with a regression line and a prediction.
+        if (e.getActionCommand().equals("PredictionChart")) {
+            float value = -1;
+            // Check if there is any data at all
+            if (!priceY.isEmpty()) {
+                try {
+                    value = Float.parseFloat(JOptionPane.showInputDialog(null, "Input a value for prediction."));
+                    // Check if the value is positive, if not throw an exception.
+                    if (value <= 0) {
+                        throw new Exception();
+                    }
+
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Please input a positive number.");
+                }
+                // Check if the value is postive.
+                if (value > 0) {
+                    XYDataset ds = createDatasetPrediction(xChosen.getSelectedIndex(), value);
+                    if (ds != null) {
+                        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+                        renderer.setSeriesLinesVisible(0, false);
+                        renderer.setSeriesShapesVisible(1, false);
+                        JFreeChart chart
+                                = ChartFactory.createXYLineChart("Your Chart",
+                                        xChosen.getSelectedItem().toString(), "Price", ds, PlotOrientation.VERTICAL, true, true,
+                                        false);
+                        XYPlot plot = (XYPlot) chart.getPlot();
+                        plot.setRenderer(renderer);
+
+                        chartDisplay.setChart(chart);
+                        mainMenu.setVisible(true);
+                    }
+                }
             } else {
                 JOptionPane.showMessageDialog(null, "Please add data through keyboard or read in a file first.");
             }
@@ -134,7 +176,8 @@ public class Modelling implements ActionListener {
         JMenuItem addThroughKeyboard = new JMenuItem();
         JMenuItem addThroughFile = new JMenuItem();
         JMenuItem plotScatterChart = new JMenuItem();
-        JMenuItem plotScatterRegressionChart = new JMenuItem();
+        JMenuItem plotRegressionChart = new JMenuItem();
+        JMenuItem plotPredictionChart = new JMenuItem();
 
         inputMenu.setFont(fnt);
         chartMenu.setFont(fnt);
@@ -157,11 +200,17 @@ public class Modelling implements ActionListener {
         plotScatterChart.addActionListener(this);
         chartMenu.add(plotScatterChart);
 
-        plotScatterRegressionChart.setText("Plot a scatter chart with a regression line");
-        plotScatterRegressionChart.setFont(fnt);
-        plotScatterRegressionChart.setActionCommand("ScatterRegressionChart");
-        plotScatterRegressionChart.addActionListener(this);
-        chartMenu.add(plotScatterRegressionChart);
+        plotRegressionChart.setText("Plot a scatter chart with a regression line");
+        plotRegressionChart.setFont(fnt);
+        plotRegressionChart.setActionCommand("RegressionChart");
+        plotRegressionChart.addActionListener(this);
+        chartMenu.add(plotRegressionChart);
+
+        plotPredictionChart.setText("Plot a scatter chart with a regression line and a prediction");
+        plotPredictionChart.setFont(fnt);
+        plotPredictionChart.setActionCommand("PredictionChart");
+        plotPredictionChart.addActionListener(this);
+        chartMenu.add(plotPredictionChart);
 
         xChosen.setFont(fnt);
         xChosen.addActionListener(this);
@@ -176,7 +225,7 @@ public class Modelling implements ActionListener {
         xChosen.addItem("Age (years)");
 
         JFreeChart emptyChart = ChartFactory.createXYLineChart("Your Chart",
-                "x", "y", null, PlotOrientation.VERTICAL, true, true,
+                "Independant variable", "Price", null, PlotOrientation.VERTICAL, true, true,
                 false);
         chartDisplay = new ChartPanel(emptyChart);
 
@@ -254,18 +303,18 @@ public class Modelling implements ActionListener {
             XYSeriesCollection dataset = new XYSeriesCollection();
             // Create a series for the display of scatter points and a series
             // to display a regression line.
-            XYSeries series1 = new XYSeries(xChosen.getSelectedItem().toString());
+            XYSeries scatter = new XYSeries(xChosen.getSelectedItem().toString());
             for (int i = 0; i < chosen.size(); i++) {
-                series1.add(chosen.get(i), priceY.get(i));
+                scatter.add(chosen.get(i), priceY.get(i));
             }
-            dataset.addSeries(series1);
+            dataset.addSeries(scatter);
             return dataset;
         } else {
             return null;
         }
     }
-    
-    //Creation of a data set for the chart
+
+    //Creation of a data set for the chart and the regression line
     private XYDataset createDatasetRegression(int chosenXID) {
         // This ArrayList will store a reference to the ArrayList which holds the
         // selected independant variables and will not be modified, only read.
@@ -306,28 +355,104 @@ public class Modelling implements ActionListener {
             XYSeriesCollection dataset = new XYSeriesCollection();
             // Create a series for the display of scatter points and a series
             // to display a regression line.
-            XYSeries series1 = new XYSeries(xChosen.getSelectedItem().toString());
+            XYSeries scatter = new XYSeries(xChosen.getSelectedItem().toString());
             XYSeries regression = new XYSeries("Regression line");
-            float largestX = 0;
+            float largestX = chosen.get(0);
+            float smallestX = chosen.get(0);
             for (int i = 0; i < chosen.size(); i++) {
-                series1.add(chosen.get(i), priceY.get(i));
+                scatter.add(chosen.get(i), priceY.get(i));
                 if (chosen.get(i) > largestX) {
                     largestX = chosen.get(i);
                 }
+                if (chosen.get(i) < smallestX) {
+                    smallestX = chosen.get(i);
+                }
             }
             RegressionAlgorithm alg = new RegressionAlgorithm(chosen, priceY);
-            float y1 = alg.getBeta1() * chosen.get(0) + alg.getBeta0();
-            float y2 = alg.getBeta1() * chosen.get(chosen.size() - 1) + alg.getBeta0();
-            regression.add(0, y1);
-            regression.add(largestX + 2, y2);
-            dataset.addSeries(series1);
+            float y1 = alg.getBeta1() * smallestX + alg.getBeta0();
+            float y2 = alg.getBeta1() * largestX + alg.getBeta0();
+            regression.add(smallestX, y1);
+            regression.add(largestX, y2);
+            dataset.addSeries(scatter);
             dataset.addSeries(regression);
             return dataset;
         } else {
             return null;
         }
     }
-    
+
+    //Creation of a data set for the chart, the regression line and aprediction
+    private XYDataset createDatasetPrediction(int chosenXID, float value) {
+        // This ArrayList will store a reference to the ArrayList which holds the
+        // selected independant variables and will not be modified, only read.
+        ArrayList<Float> chosen = null;
+        // A switch statement to determine which independant variable was selected
+        // from the JComboBox to create a chart.
+        switch (chosenXID) {
+            case 0:
+                JOptionPane.showMessageDialog(null, "Please select an independent variable above to continue.");
+                break;
+            case 1:
+                chosen = noOfBathroomsX1;
+                break;
+            case 2:
+                chosen = siteAreaX2;
+                break;
+            case 3:
+                chosen = livingSpaceX3;
+                break;
+            case 4:
+                chosen = noOfGaragesX4;
+                break;
+            case 5:
+                chosen = noOfRoomsX5;
+                break;
+            case 6:
+                chosen = noOfBedroomsX6;
+                break;
+            case 7:
+                chosen = ageX7;
+                break;
+        }
+        // Determine if an independant variable is selected. If not, a null is
+        // returned instead of a dataset and the graph stays either empty 
+        // if no chart has been created before or the last correctly created 
+        // chart is going to be displayed in the graph.
+        if (chosen != null) {
+            XYSeriesCollection dataset = new XYSeriesCollection();
+            // Create a series for the display of scatter points and a series
+            // to display a regression line.
+            XYSeries scatter = new XYSeries(xChosen.getSelectedItem().toString());
+            XYSeries regression = new XYSeries("Regression line");
+            XYSeries prediction = new XYSeries("Predicted variable");
+            float largestX = chosen.get(0);
+            float smallestX = chosen.get(0);
+            for (int i = 0; i < chosen.size(); i++) {
+                scatter.add(chosen.get(i), priceY.get(i));
+                if (chosen.get(i) > largestX) {
+                    largestX = chosen.get(i);
+                }
+                if (chosen.get(i) < smallestX) {
+                    smallestX = chosen.get(i);
+                }
+            }
+            RegressionAlgorithm alg = new RegressionAlgorithm(chosen, priceY);
+            float y1 = alg.getBeta1() * smallestX + alg.getBeta0();
+            float y2 = alg.getBeta1() * largestX + alg.getBeta0();
+            float y3 = alg.getBeta1() * value + alg.getBeta0();
+
+            regression.add(smallestX, y1);
+            regression.add(largestX, y2);
+            prediction.add(value, y3);
+            dataset.addSeries(scatter);
+            dataset.addSeries(regression);
+            dataset.addSeries(prediction);
+            return dataset;
+        } else {
+            return null;
+        }
+    }
+
     //The method reads in data from a provided .txt file
     private void readDataFromFile() throws FileNotFoundException {
         //Read and store the lines into an ArrayList
