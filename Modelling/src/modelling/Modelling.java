@@ -69,6 +69,45 @@ public class Modelling implements ActionListener {
                 JOptionPane.showMessageDialog(null, "The file has not been found.");
             }
         }
+        // Table
+        if (e.getActionCommand().equals("Table")) {
+            if (!priceY.isEmpty()) {
+                TablesJFrame tables = new TablesJFrame(this, xChosen.getSelectedIndex());
+            } else {
+                JOptionPane.showMessageDialog(null, "Please add data through keyboard or read in a file first.");
+            }
+        }
+        //Cc
+        if (e.getActionCommand().equals("Cc")) {
+            int cf = (int) getHighestCorrelationCoefficient() + 1;
+            RegressionAlgorithm ar = new RegressionAlgorithm();
+            switch (cf) {
+                case 1:
+                    ar = new RegressionAlgorithm(noOfBathroomsX1, priceY);
+                    break;
+                case 2:
+                    ar = new RegressionAlgorithm(siteAreaX2, priceY);
+                    break;
+                case 3:
+                    ar = new RegressionAlgorithm(livingSpaceX3, priceY);
+                    break;
+                case 4:
+                    ar = new RegressionAlgorithm(noOfGaragesX4, priceY);
+                    break;
+                case 5:
+                    ar = new RegressionAlgorithm(noOfRoomsX5, priceY);
+                    break;
+                case 6:
+                    ar = new RegressionAlgorithm(noOfBedroomsX6, priceY);
+                    break;
+                case 7:
+                    ar = new RegressionAlgorithm(ageX7, priceY);
+                    break;
+            }
+            JOptionPane.showMessageDialog(null, "The independant variable with the "
+                    + "highest correlation coefficient is: " + xChosen.getItemAt(cf).toString()
+                    + ". Correlation coefficient: " + ar.getR2());
+        }
         //Called if we want to plot a scatter chart.
         if (e.getActionCommand().equals("ScatterChart")) {
             // Check if there is any data at all
@@ -135,6 +174,7 @@ public class Modelling implements ActionListener {
                         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
                         renderer.setSeriesLinesVisible(0, false);
                         renderer.setSeriesShapesVisible(1, false);
+                        renderer.setSeriesLinesVisible(2, false);
                         JFreeChart chart
                                 = ChartFactory.createXYLineChart("Your Chart",
                                         xChosen.getSelectedItem().toString(), "Price", ds, PlotOrientation.VERTICAL, true, true,
@@ -178,6 +218,8 @@ public class Modelling implements ActionListener {
         JMenuItem plotScatterChart = new JMenuItem();
         JMenuItem plotRegressionChart = new JMenuItem();
         JMenuItem plotPredictionChart = new JMenuItem();
+        JMenuItem tables = new JMenuItem();
+        JMenuItem cc = new JMenuItem();
 
         inputMenu.setFont(fnt);
         chartMenu.setFont(fnt);
@@ -193,6 +235,18 @@ public class Modelling implements ActionListener {
         addThroughFile.setActionCommand("File");
         addThroughFile.addActionListener(this);
         inputMenu.add(addThroughFile);
+
+        tables.setText("View tables");
+        tables.setFont(fnt);
+        tables.setActionCommand("Table");
+        tables.addActionListener(this);
+        inputMenu.add(tables);
+
+        cc.setText("View highest correlation coefficient");
+        cc.setFont(fnt);
+        cc.setActionCommand("Cc");
+        cc.addActionListener(this);
+        inputMenu.add(cc);
 
         plotScatterChart.setText("Plot a scatter chart");
         plotScatterChart.setFont(fnt);
@@ -474,5 +528,98 @@ public class Modelling implements ActionListener {
             noOfBedroomsX6.add((float) Integer.parseInt(tmp[7]));
             ageX7.add((float) Integer.parseInt(tmp[8]));
         }
+    }
+
+    private float getHighestCorrelationCoefficient() {
+        RegressionAlgorithm ra = new RegressionAlgorithm(noOfBathroomsX1, priceY);
+        ArrayList<Float> coef = new ArrayList<>();
+        coef.add(ra.getR2());
+        ra = new RegressionAlgorithm(siteAreaX2, priceY);
+        coef.add(ra.getR2());
+        ra = new RegressionAlgorithm(livingSpaceX3, priceY);
+        coef.add(ra.getR2());
+        ra = new RegressionAlgorithm(noOfGaragesX4, priceY);
+        coef.add(ra.getR2());
+        ra = new RegressionAlgorithm(noOfRoomsX5, priceY);
+        coef.add(ra.getR2());
+        ra = new RegressionAlgorithm(noOfBedroomsX6, priceY);
+        coef.add(ra.getR2());
+        ra = new RegressionAlgorithm(ageX7, priceY);
+        coef.add(ra.getR2());
+        float[][] coeff = new float[coef.size()][2];
+        for (int i = 0; i < coef.size(); i++) {
+            coeff[i][0] = (float) i;
+            coeff[i][1] = coef.get(i);
+        }
+        float biggest = 0;
+        for (int i = 0; i < coef.size(); i++) {
+            for (int j = 1; j < coef.size(); j++) {
+                if (coeff[j - 1][1] < coeff[j][1]) {
+                    float tempindex = coeff[j - 1][0];
+                    coeff[j - 1][0] = coeff[j][0];
+                    coeff[j][0] = tempindex;
+                    float temp = coeff[j - 1][1];
+                    coeff[j - 1][1] = coeff[j][1];
+                    coeff[j][1] = temp;
+                }
+            }
+        }
+        return coeff[0][0];
+    }
+
+    /**
+     * @return the priceY
+     */
+    public ArrayList<Float> getPriceY() {
+        return priceY;
+    }
+
+    /**
+     * @return the noOfBathroomsX1
+     */
+    public ArrayList<Float> getNoOfBathroomsX1() {
+        return noOfBathroomsX1;
+    }
+
+    /**
+     * @return the siteAreaX2
+     */
+    public ArrayList<Float> getSiteAreaX2() {
+        return siteAreaX2;
+    }
+
+    /**
+     * @return the livingSpaceX3
+     */
+    public ArrayList<Float> getLivingSpaceX3() {
+        return livingSpaceX3;
+    }
+
+    /**
+     * @return the noOfGaragesX4
+     */
+    public ArrayList<Float> getNoOfGaragesX4() {
+        return noOfGaragesX4;
+    }
+
+    /**
+     * @return the noOfRoomsX5
+     */
+    public ArrayList<Float> getNoOfRoomsX5() {
+        return noOfRoomsX5;
+    }
+
+    /**
+     * @return the noOfBedroomsX6
+     */
+    public ArrayList<Float> getNoOfBedroomsX6() {
+        return noOfBedroomsX6;
+    }
+
+    /**
+     * @return the ageX7
+     */
+    public ArrayList<Float> getAgeX7() {
+        return ageX7;
     }
 }
