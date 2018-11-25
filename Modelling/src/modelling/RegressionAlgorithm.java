@@ -37,7 +37,7 @@ public class RegressionAlgorithm {
     // The method returns the mean for a provided data set.
     public float mean(ArrayList<Float> data) {
         float sum = 0;
-        for (int i = 0; i < data.size() - 1; i++) {
+        for (int i = 0; i < data.size(); i++) {
             sum += data.get(i);
         }
         return sum / (float) data.size();
@@ -46,7 +46,7 @@ public class RegressionAlgorithm {
     // The method finds the sum of squares between 2 provided data sets.
     private float sumOfSquares(ArrayList<Float> data1, ArrayList<Float> data2) {
         float sum = 0;
-        for (int i = 0; i < data1.size() - 1; i++) {
+        for (int i = 0; i < data1.size(); i++) {
             sum += (data1.get(i) - mean(data1)) * (data2.get(i) - mean(data2));
         }
         return sum;

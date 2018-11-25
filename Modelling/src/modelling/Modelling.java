@@ -2,6 +2,7 @@ package modelling;
 
 import javax.swing.*;
 import java.awt.Font;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -20,6 +21,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.util.ShapeUtilities;
 
 /**
  * The main Modelling class for the coursework provides a simple GUI to plot
@@ -44,6 +46,15 @@ public class Modelling implements ActionListener {
     private ArrayList<Float> noOfBedroomsX6;
     private ArrayList<Float> ageX7;
 
+    ArrayList<Float> comparisonPriceY = new ArrayList<>();
+    ArrayList<Float> comparisonNoOfBathroomsX1 = new ArrayList<>();
+    ArrayList<Float> comparisonSiteAreaX2 = new ArrayList<>();
+    ArrayList<Float> comparisonLivingSpaceX3 = new ArrayList<>();
+    ArrayList<Float> comparisonNoOfGaragesX4 = new ArrayList<>();
+    ArrayList<Float> comparisonNoOfRoomsX5 = new ArrayList<>();
+    ArrayList<Float> comparisonNoOfBedroomsX6 = new ArrayList<>();
+    ArrayList<Float> comparisonAgeX7 = new ArrayList<>();
+
     public static void main(String[] args) {
         Modelling application = new Modelling();
     }
@@ -51,7 +62,6 @@ public class Modelling implements ActionListener {
     public Modelling() {
         model();
         view();
-        controller();
     }
 
     @Override
@@ -64,9 +74,40 @@ public class Modelling implements ActionListener {
         if (e.getActionCommand().equals("File")) {
             try {
                 readDataFromFile();
+                JOptionPane.showMessageDialog(null, "\"Training data set.txt\" has been successfully inputted!");
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(Modelling.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showMessageDialog(null, "The file has not been found.");
+            }
+        }
+
+        if (e.getActionCommand().equals("Comparison")) {
+            String[] options = {"Town A", "Town B", "Town C"};
+            int choice = JOptionPane.showOptionDialog(null, ("Select a town"),
+                    "Select a town", 0, 3, null, options, null);
+            if (choice == 0) {
+                try {
+                    readDataFromFile("Town A");
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(Modelling.class.getName()).log(Level.SEVERE, null, ex);
+
+                }
+            } else if (choice == 1) {
+                try {
+                    readDataFromFile("Town B");
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(Modelling.class.getName()).log(Level.SEVERE, null, ex);
+
+                }
+            } else if (choice == 2) {
+                try {
+                    readDataFromFile("Town C");
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(Modelling.class.getName()).log(Level.SEVERE, null, ex);
+
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "File not Found");
             }
         }
         // Table
@@ -76,37 +117,6 @@ public class Modelling implements ActionListener {
             } else {
                 JOptionPane.showMessageDialog(null, "Please add data through keyboard or read in a file first.");
             }
-        }
-        //Cc
-        if (e.getActionCommand().equals("Cc")) {
-            int cf = (int) getHighestCorrelationCoefficient() + 1;
-            RegressionAlgorithm ar = new RegressionAlgorithm();
-            switch (cf) {
-                case 1:
-                    ar = new RegressionAlgorithm(noOfBathroomsX1, priceY);
-                    break;
-                case 2:
-                    ar = new RegressionAlgorithm(siteAreaX2, priceY);
-                    break;
-                case 3:
-                    ar = new RegressionAlgorithm(livingSpaceX3, priceY);
-                    break;
-                case 4:
-                    ar = new RegressionAlgorithm(noOfGaragesX4, priceY);
-                    break;
-                case 5:
-                    ar = new RegressionAlgorithm(noOfRoomsX5, priceY);
-                    break;
-                case 6:
-                    ar = new RegressionAlgorithm(noOfBedroomsX6, priceY);
-                    break;
-                case 7:
-                    ar = new RegressionAlgorithm(ageX7, priceY);
-                    break;
-            }
-            JOptionPane.showMessageDialog(null, "The independant variable with the "
-                    + "highest correlation coefficient is: " + xChosen.getItemAt(cf).toString()
-                    + ". Correlation coefficient: " + ar.getR2());
         }
         //Called if we want to plot a scatter chart.
         if (e.getActionCommand().equals("ScatterChart")) {
@@ -190,6 +200,74 @@ public class Modelling implements ActionListener {
                 JOptionPane.showMessageDialog(null, "Please add data through keyboard or read in a file first.");
             }
         }
+
+        if (e.getActionCommand().equals("ComparisonChart")) {
+            // Check if there is any data at all
+            if (!comparisonPriceY.isEmpty() && !comparisonPriceY.isEmpty()) {
+                XYDataset ds = createDatasetComparison(xChosen.getSelectedIndex());
+                if (ds != null) {
+                    XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+                    renderer.setSeriesLinesVisible(0, false);
+                    renderer.setSeriesShapesVisible(1, false);
+                    renderer.setSeriesLinesVisible(2, false);
+
+                    JFreeChart chart
+                            = ChartFactory.createXYLineChart("Your Chart",
+                                    xChosen.getSelectedItem().toString(),
+                                    "Price", ds, PlotOrientation.VERTICAL,
+                                    true, true, false);
+                    Shape point = ShapeUtilities.createDiamond(2);
+                    renderer.setSeriesShape(1, point);
+                    renderer.setSeriesShape(2, point);
+                    XYPlot plot = (XYPlot) chart.getPlot();
+                    plot.setRenderer(renderer);
+                    chartDisplay.setChart(chart);
+                    mainMenu.setVisible(true);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Please ensure training data and comparison data are inputted.");
+            }
+        }
+
+        //Called if we want to plot a scatter chart with a regression line and a prediction.
+        if (e.getActionCommand().equals("BestMeasure")) {
+            float value = -1;
+            // Check if there is any data at all
+            if (!priceY.isEmpty() && !comparisonPriceY.isEmpty()) {
+                try {
+                    value = Float.parseFloat(JOptionPane.showInputDialog(null, "Input a value for prediction."));
+                    // Check if the value is positive, if not throw an exception.
+                    if (value <= 0) {
+                        throw new Exception();
+                    }
+
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Please input a positive number.");
+                }
+                // Check if the value is postive.
+                if (value > 0) {
+                    XYDataset ds = createDatasetBestMeasure(getHighestCorrelationCoefficient(), value);
+                    if (ds != null) {
+                        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+                        renderer.setSeriesLinesVisible(0, false);
+                        renderer.setSeriesShapesVisible(1, false);
+                        renderer.setSeriesLinesVisible(2, false);
+                        renderer.setSeriesLinesVisible(3, false);
+                        JFreeChart chart
+                                = ChartFactory.createXYLineChart("Your Chart",
+                                        xChosen.getSelectedItem().toString(), "Price", ds, PlotOrientation.VERTICAL, true, true,
+                                        false);
+                        XYPlot plot = (XYPlot) chart.getPlot();
+                        plot.setRenderer(renderer);
+
+                        chartDisplay.setChart(chart);
+                        mainMenu.setVisible(true);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Please ensure training data and comparison data are inputted.");
+            }
+        }
     }
 
     // Initialisation of the ArrayLists
@@ -215,9 +293,12 @@ public class Modelling implements ActionListener {
         JMenu chartMenu = new JMenu("Choose a chart");
         JMenuItem addThroughKeyboard = new JMenuItem();
         JMenuItem addThroughFile = new JMenuItem();
+        JMenuItem addComparisonFile = new JMenuItem();
         JMenuItem plotScatterChart = new JMenuItem();
         JMenuItem plotRegressionChart = new JMenuItem();
         JMenuItem plotPredictionChart = new JMenuItem();
+        JMenuItem plotComparisonData = new JMenuItem();
+        JMenuItem plotBestMeasure = new JMenuItem();
         JMenuItem tables = new JMenuItem();
         JMenuItem cc = new JMenuItem();
 
@@ -230,13 +311,19 @@ public class Modelling implements ActionListener {
         addThroughKeyboard.addActionListener(this);
         inputMenu.add(addThroughKeyboard);
 
-        addThroughFile.setText("Read in a file");
+        addThroughFile.setText("Read in Training data set.txt");
         addThroughFile.setFont(fnt);
         addThroughFile.setActionCommand("File");
         addThroughFile.addActionListener(this);
         inputMenu.add(addThroughFile);
 
-        tables.setText("View tables");
+        addComparisonFile.setText("Read in comparison data set");
+        addComparisonFile.setFont(fnt);
+        addComparisonFile.setActionCommand("Comparison");
+        addComparisonFile.addActionListener(this);
+        inputMenu.add(addComparisonFile);
+
+        tables.setText("View data tables for a specific independent variable");
         tables.setFont(fnt);
         tables.setActionCommand("Table");
         tables.addActionListener(this);
@@ -248,23 +335,35 @@ public class Modelling implements ActionListener {
         cc.addActionListener(this);
         inputMenu.add(cc);
 
-        plotScatterChart.setText("Plot a scatter chart");
+        plotScatterChart.setText("Training data");
         plotScatterChart.setFont(fnt);
         plotScatterChart.setActionCommand("ScatterChart");
         plotScatterChart.addActionListener(this);
         chartMenu.add(plotScatterChart);
 
-        plotRegressionChart.setText("Plot a scatter chart with a regression line");
+        plotRegressionChart.setText("Training data with a regression line");
         plotRegressionChart.setFont(fnt);
         plotRegressionChart.setActionCommand("RegressionChart");
         plotRegressionChart.addActionListener(this);
         chartMenu.add(plotRegressionChart);
 
-        plotPredictionChart.setText("Plot a scatter chart with a regression line and a prediction");
+        plotPredictionChart.setText("Training data with a regression line and a predicted variable");
         plotPredictionChart.setFont(fnt);
         plotPredictionChart.setActionCommand("PredictionChart");
         plotPredictionChart.addActionListener(this);
         chartMenu.add(plotPredictionChart);
+
+        plotComparisonData.setText("Training data with a regression line and comparison data");
+        plotComparisonData.setFont(fnt);
+        plotComparisonData.setActionCommand("ComparisonChart");
+        plotComparisonData.addActionListener(this);
+        chartMenu.add(plotComparisonData);
+
+        plotBestMeasure.setText("View training data with a \"best measure\" regression line, comparison data and a predicted variable");
+        plotBestMeasure.setFont(fnt);
+        plotBestMeasure.setActionCommand("BestMeasure");
+        plotBestMeasure.addActionListener(this);
+        inputMenu.add(plotBestMeasure);
 
         xChosen.setFont(fnt);
         xChosen.addActionListener(this);
@@ -279,14 +378,14 @@ public class Modelling implements ActionListener {
         xChosen.addItem("Age (years)");
 
         JFreeChart emptyChart = ChartFactory.createXYLineChart("Your Chart",
-                "Independant variable", "Price", null, PlotOrientation.VERTICAL, true, true,
+                "Independent variable", "Price", null, PlotOrientation.VERTICAL, true, true,
                 false);
         chartDisplay = new ChartPanel(emptyChart);
 
         mainMenu.setJMenuBar(menuBar);
         menuBar.add(inputMenu);
-        menuBar.add(chartMenu);
         menuBar.add(xChosen);
+        menuBar.add(chartMenu);
         mainMenu.add(chartDisplay);
         mainMenu.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
@@ -294,10 +393,6 @@ public class Modelling implements ActionListener {
         mainMenu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         mainMenu.setVisible(true);
-    }
-
-    private void controller() {
-
     }
 
     // Method is used to store data inputted through the keyboard into the corresponding ArrayLists
@@ -507,6 +602,187 @@ public class Modelling implements ActionListener {
         }
     }
 
+    private XYDataset createDatasetComparison(int chosenXID) {
+        // This ArrayList will store a reference to the ArrayList which holds the
+        // selected independant variables and will not be modified, only read.
+        ArrayList<Float> comparisonChosen = null;
+        ArrayList<Float> chosen = null;
+        // A switch statement to determine which independant variable was selected
+        // from the JComboBox to create a chart.
+        switch (chosenXID) {
+            case 0:
+                JOptionPane.showMessageDialog(null, "Please select an independent variable above to continue.");
+                break;
+            case 1:
+                comparisonChosen = comparisonNoOfBathroomsX1;
+                chosen = noOfBathroomsX1;
+                break;
+            case 2:
+                comparisonChosen = comparisonSiteAreaX2;
+                chosen = siteAreaX2;
+                break;
+            case 3:
+                comparisonChosen = comparisonLivingSpaceX3;
+                chosen = livingSpaceX3;
+                break;
+            case 4:
+                comparisonChosen = comparisonNoOfGaragesX4;
+                chosen = noOfGaragesX4;
+                break;
+            case 5:
+                comparisonChosen = comparisonNoOfRoomsX5;
+                chosen = noOfRoomsX5;
+                break;
+            case 6:
+                comparisonChosen = comparisonNoOfBedroomsX6;
+                chosen = noOfBedroomsX6;
+                break;
+            case 7:
+                comparisonChosen = comparisonAgeX7;
+                chosen = ageX7;
+                break;
+        }
+        // Determine if an independant variable is selected. If not, a null is
+        // returned instead of a dataset and the graph stays either empty 
+        // if no chart has been created before or the last correctly created 
+        // chart is going to be displayed in the graph.
+        if (chosen != null && comparisonChosen != null) {
+            XYSeriesCollection dataset = new XYSeriesCollection();
+            // Create a series for the display of scatter points and a series
+            // to display a regression line.
+            XYSeries scatter = new XYSeries(xChosen.getSelectedItem().toString());
+            XYSeries regression = new XYSeries("Regression line");
+            XYSeries comparisonScatter = new XYSeries("Comparison set");
+            float largestX = chosen.get(0);
+            float smallestX = chosen.get(0);
+            for (int i = 0; i < chosen.size(); i++) {
+                scatter.add(chosen.get(i), priceY.get(i));
+                if (chosen.get(i) > largestX) {
+                    largestX = chosen.get(i);
+                }
+                if (chosen.get(i) < smallestX) {
+                    smallestX = chosen.get(i);
+                }
+            }
+            RegressionAlgorithm alg = new RegressionAlgorithm(chosen, priceY);
+            float y1 = alg.getBeta1() * smallestX + alg.getBeta0();
+            float y2 = alg.getBeta1() * largestX + alg.getBeta0();
+            regression.add(smallestX, y1);
+            regression.add(largestX, y2);
+            // Create a series for the display of scatter points and a series
+            // to display a regression line.
+            for (int i = 0; i < comparisonChosen.size(); i++) {
+                comparisonScatter.add(comparisonChosen.get(i), comparisonPriceY.get(i));
+            }
+            dataset.addSeries(scatter);
+            dataset.addSeries(regression);
+            dataset.addSeries(comparisonScatter);
+            return dataset;
+        } else {
+            return null;
+        }
+    }
+
+    private XYDataset createDatasetBestMeasure(int chosenXID, float value) {
+        // This ArrayList will store a reference to the ArrayList which holds the
+        // selected independant variables and will not be modified, only read.
+        ArrayList<Float> comparisonChosen = null;
+        ArrayList<Float> chosen = null;
+        // A switch statement to determine which independant variable was selected
+        // from the JComboBox to create a chart.
+        switch (chosenXID) {
+            case 0:
+                JOptionPane.showMessageDialog(null, "Please select an independent variable above to continue.");
+                break;
+            case 1:
+                comparisonChosen = comparisonNoOfBathroomsX1;
+                chosen = noOfBathroomsX1;
+                break;
+            case 2:
+                comparisonChosen = comparisonSiteAreaX2;
+                chosen = siteAreaX2;
+                break;
+            case 3:
+                comparisonChosen = comparisonLivingSpaceX3;
+                chosen = livingSpaceX3;
+                break;
+            case 4:
+                comparisonChosen = comparisonNoOfGaragesX4;
+                chosen = noOfGaragesX4;
+                break;
+            case 5:
+                comparisonChosen = comparisonNoOfRoomsX5;
+                chosen = noOfRoomsX5;
+                break;
+            case 6:
+                comparisonChosen = comparisonNoOfBedroomsX6;
+                chosen = noOfBedroomsX6;
+                break;
+            case 7:
+                comparisonChosen = comparisonAgeX7;
+                chosen = ageX7;
+                break;
+        }
+        // Determine if an independant variable is selected. If not, a null is
+        // returned instead of a dataset and the graph stays either empty 
+        // if no chart has been created before or the last correctly created 
+        // chart is going to be displayed in the graph.
+        if (chosen != null && comparisonChosen != null) {
+            XYSeriesCollection dataset = new XYSeriesCollection();
+            // Create a series for the display of scatter points and a series
+            // to display a regression line.
+            XYSeries scatter = new XYSeries(xChosen.getSelectedItem().toString());
+            XYSeries regression = new XYSeries("Regression line");
+            XYSeries prediction = new XYSeries("Predicted variable");
+            XYSeries comparisonScatter = new XYSeries("Comparison set");
+            float largestX = chosen.get(0);
+            float smallestX = chosen.get(0);
+            for (int i = 0; i < chosen.size(); i++) {
+                scatter.add(chosen.get(i), priceY.get(i));
+                if (chosen.get(i) > largestX) {
+                    largestX = chosen.get(i);
+                }
+                if (value > largestX) {
+                    largestX = value;
+                }
+                if (chosen.get(i) < smallestX) {
+                    smallestX = chosen.get(i);
+                }
+                if (value < smallestX) {
+                    smallestX = value;
+                }
+            }
+            for (int i = 0; i < comparisonChosen.size(); i++) {
+                if (comparisonChosen.get(i) > largestX) {
+                    largestX = comparisonChosen.get(i);
+                }
+                if (comparisonChosen.get(i) < smallestX) {
+                    smallestX = comparisonChosen.get(i);
+                }
+            }
+            RegressionAlgorithm alg = new RegressionAlgorithm(chosen, priceY);
+            float y1 = alg.getBeta1() * smallestX + alg.getBeta0();
+            float y2 = alg.getBeta1() * largestX + alg.getBeta0();
+            float y3 = alg.getBeta1() * value + alg.getBeta0();
+            regression.add(smallestX, y1);
+            regression.add(largestX, y2);
+            prediction.add(value, y3);
+            // Create a series for the display of scatter points and a series
+            // to display a regression line.
+
+            for (int i = 0; i < comparisonChosen.size(); i++) {
+                comparisonScatter.add(comparisonChosen.get(i), comparisonPriceY.get(i));
+            }
+            dataset.addSeries(scatter);
+            dataset.addSeries(regression);
+            dataset.addSeries(prediction);
+            dataset.addSeries(comparisonScatter);
+            return dataset;
+        } else {
+            return null;
+        }
+    }
+
     //The method reads in data from a provided .txt file
     private void readDataFromFile() throws FileNotFoundException {
         //Read and store the lines into an ArrayList
@@ -530,7 +806,7 @@ public class Modelling implements ActionListener {
         }
     }
 
-    private float getHighestCorrelationCoefficient() {
+    private int getHighestCorrelationCoefficient() {
         RegressionAlgorithm ra = new RegressionAlgorithm(noOfBathroomsX1, priceY);
         ArrayList<Float> coef = new ArrayList<>();
         coef.add(ra.getR2());
@@ -564,7 +840,54 @@ public class Modelling implements ActionListener {
                 }
             }
         }
-        return coeff[0][0];
+//        switch ((int) coeff[0][0] + 1) {
+//            case 1:
+//                return noOfBathroomsX1;
+//            case 2:
+//                return siteAreaX2;
+//            case 3:
+//                return livingSpaceX3;
+//            case 4:
+//                return noOfGaragesX4;
+//            case 5:
+//                return noOfRoomsX5;
+//            case 6:
+//                return noOfBedroomsX6;
+//            case 7:
+//                return ageX7;
+//        }
+        return (int) coeff[0][0] + 1;
+    }
+
+    private void readDataFromFile(String town) throws FileNotFoundException {
+        //Read and store the lines into an ArrayList
+        Scanner scan = new Scanner(new File(town + ".txt"));
+        ArrayList<String> list = new ArrayList();
+        list.clear();
+        comparisonPriceY.clear();
+        comparisonNoOfBathroomsX1.clear();
+        comparisonSiteAreaX2.clear();
+        comparisonLivingSpaceX3.clear();
+        comparisonNoOfGaragesX4.clear();
+        comparisonNoOfRoomsX5.clear();
+        comparisonNoOfBedroomsX6.clear();
+        comparisonAgeX7.clear();
+        while (scan.hasNext()) {
+            list.add(scan.nextLine());
+        }
+        // Iterative process to store each peace of data into corresponding ArrayLists
+        for (int i = 0; i < list.size(); i++) {
+            String[] temp = new String[8];
+            temp = list.get(i).split("\t");
+            comparisonPriceY.add(Float.parseFloat(temp[1]));
+            comparisonNoOfBathroomsX1.add(Float.parseFloat(temp[2]));
+            comparisonSiteAreaX2.add(Float.parseFloat(temp[3]));
+            comparisonLivingSpaceX3.add(Float.parseFloat(temp[4]));
+            comparisonNoOfGaragesX4.add((float) Integer.parseInt(temp[5]));
+            comparisonNoOfRoomsX5.add((float) Integer.parseInt(temp[6]));
+            comparisonNoOfBedroomsX6.add((float) Integer.parseInt(temp[7]));
+            comparisonAgeX7.add((float) Integer.parseInt(temp[8]));
+        }
     }
 
     /**

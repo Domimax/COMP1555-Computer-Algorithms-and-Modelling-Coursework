@@ -33,36 +33,44 @@ public class TablesJFrame extends JFrame {
         ArrayList<Float> chosen = null;
         // A switch statement to determine which independant variable was selected
         // from the JComboBox to create a chart.
+        String name = "";
         switch (chosenXID) {
             case 0:
                 JOptionPane.showMessageDialog(null, "Please select an independent variable above to continue.");
                 break;
             case 1:
                 chosen = modelling.getNoOfBathroomsX1();
+                name = "No. of bathrooms";
                 break;
             case 2:
                 chosen = modelling.getSiteAreaX2();
+                name = "Site area (1000's sq feet)";
                 break;
             case 3:
                 chosen = modelling.getLivingSpaceX3();
+                name = "Living space (1000's sq feet)";
                 break;
             case 4:
                 chosen = modelling.getNoOfGaragesX4();
+                name = "No. of garages";
                 break;
             case 5:
                 chosen = modelling.getNoOfRoomsX5();
+                name = "No. of rooms";
                 break;
             case 6:
                 chosen = modelling.getNoOfBedroomsX6();
+                name = "No. of bedrooms";
                 break;
             case 7:
                 chosen = modelling.getAgeX7();
+                name = "age (years)";
                 break;
         }
         if (chosen != null) {
 
             RegressionAlgorithm ra = new RegressionAlgorithm();
-            Object columns[] = {" ", "X", "Y"};
+            Object columns[] = {" ", "X - " + name, "Y - Price (100000's £)"};
             Object rows[][] = {{"N", chosen.size(), modelling.getPriceY().size()}, {"Mean",
                 ra.mean(chosen), ra.mean(modelling.getPriceY())},
             {"Variance", ra.variance(chosen), ra.variance(modelling.getPriceY())},
@@ -107,7 +115,7 @@ public class TablesJFrame extends JFrame {
             table3.setSize(10, 10);
             add(scrollPane3, BorderLayout.SOUTH);
 
-            Object columns4[] = {"X", "Y", "Forecasted Y",
+            Object columns4[] = {"X - " + name, "Y - Price (100000's £)", "Forecasted Y",
                 "Standard error of estimate"};
             Object rows4[][] = new Object[28][4];
 
