@@ -1,5 +1,6 @@
 package modelling;
 
+import static java.lang.Math.sqrt;
 import java.util.ArrayList;
 
 /**
@@ -9,6 +10,7 @@ import java.util.ArrayList;
  * @author Maks Domas Smirnov, ID: ms8749c
  */
 public class RegressionAlgorithm {
+
     // Regression coefficient beta1
     private float beta1;
     // Regression coefficient beta0
@@ -28,10 +30,14 @@ public class RegressionAlgorithm {
         findCorrelationCoefficient();
     }
 
+    public RegressionAlgorithm() {
+
+    }
+
     // The method returns the mean for a provided data set.
-    private float mean(ArrayList<Float> data) {
+    public float mean(ArrayList<Float> data) {
         float sum = 0;
-        for (int i = 0; i < data.size() - 1; i++) {
+        for (int i = 0; i < data.size(); i++) {
             sum += data.get(i);
         }
         return sum / (float) data.size();
@@ -40,8 +46,32 @@ public class RegressionAlgorithm {
     // The method finds the sum of squares between 2 provided data sets.
     private float sumOfSquares(ArrayList<Float> data1, ArrayList<Float> data2) {
         float sum = 0;
-        for (int i = 0; i < data1.size() - 1; i++) {
+        for (int i = 0; i < data1.size(); i++) {
             sum += (data1.get(i) - mean(data1)) * (data2.get(i) - mean(data2));
+        }
+        return sum;
+    }
+
+    public float sum(ArrayList<Float> data) {
+        float sum = 0;
+        for (int i = 0; i < data.size(); i++) {
+            sum += (data.get(i));
+        }
+        return sum;
+    }
+
+    public float sumSquares(ArrayList<Float> data) {
+        float sum = 0;
+        for (int i = 0; i < data.size(); i++) {
+            sum += (float) Math.pow(data.get(i), 2);
+        }
+        return sum;
+    }
+
+    public float sumSquares(ArrayList<Float> data1, ArrayList<Float> data2) {
+        float sum = 0;
+        for (int i = 0; i < data1.size(); i++) {
+            sum += data1.get(i) * data2.get(i);
         }
         return sum;
     }
@@ -56,6 +86,18 @@ public class RegressionAlgorithm {
     private void findCorrelationCoefficient() {
         r2 = (sumOfSquares(dataXi, dataY) * sumOfSquares(dataXi, dataY))
                 / (sumOfSquares(dataXi, dataXi) * sumOfSquares(dataY, dataY));
+    }
+
+    public float variance(ArrayList<Float> data) {
+        float sum = 0;
+        for (int i = 0; i < data.size(); i++) {
+            sum += Math.pow((data.get(i) - mean(data)), 2);
+        }
+        return sum / data.size();
+    }
+
+    public float standardDeviation(ArrayList<Float> data) {
+        return (float) sqrt(variance(data));
     }
 
     public float getBeta1() {

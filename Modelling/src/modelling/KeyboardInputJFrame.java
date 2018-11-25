@@ -13,6 +13,7 @@ import javax.swing.JTextField;
  * @author Maks Domas Smirnov, ID: ms8749c
  */
 public class KeyboardInputJFrame extends JFrame implements ActionListener {
+
     private Modelling modelling;
 
     private JTextField fieldBathrooms;
