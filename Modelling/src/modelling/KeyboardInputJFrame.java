@@ -111,14 +111,25 @@ public class KeyboardInputJFrame extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        //Stores the data in the arraylists of the modelling class and deletes 
+        //Stores the data in the arraylist of properties in the modelling class and deletes 
         //all associations to this form, so that the garbage collector can dispose of it
         if (e.getActionCommand().equals("Submit")) {
-            modelling.storeKeyboardInputData();
+            storeKeyboardInputData();
             this.setVisible(false);
             modelling.setForm(null);
             modelling = null;
         }
+    }
+
+    // Method is used to store data inputted through the keyboard
+    private void storeKeyboardInputData() {
+        Property newProperty = new Property(Property.getIdCount(), Float.parseFloat(getFieldBathrooms().getText()),
+                Float.parseFloat(getFieldAreaSite().getText()), Float.parseFloat(getFieldLivingSpace().getText()),
+                (float) Integer.parseInt(getFieldGarages().getText()), (float) Integer.parseInt(getFieldRooms().getText()),
+                (float) Integer.parseInt(getFieldBedrooms().getText()), (float) Integer.parseInt(getFieldAge().getText()),
+                Float.parseFloat(getFieldPrice().getText()));
+        Property.setIdCount(Property.getIdCount() + 1);
+        modelling.getProperties().add(newProperty);
     }
 
     public JTextField getFieldBathrooms() {
