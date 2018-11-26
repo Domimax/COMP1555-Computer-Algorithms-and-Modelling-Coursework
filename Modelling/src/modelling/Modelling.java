@@ -37,23 +37,8 @@ public class Modelling implements ActionListener {
     private JComboBox xChosen;
     private ChartPanel chartDisplay;
 
-    private ArrayList<Float> priceY;
-    private ArrayList<Float> noOfBathroomsX1;
-    private ArrayList<Float> siteAreaX2;
-    private ArrayList<Float> livingSpaceX3;
-    private ArrayList<Float> noOfGaragesX4;
-    private ArrayList<Float> noOfRoomsX5;
-    private ArrayList<Float> noOfBedroomsX6;
-    private ArrayList<Float> ageX7;
-
-    ArrayList<Float> comparisonPriceY = new ArrayList<>();
-    ArrayList<Float> comparisonNoOfBathroomsX1 = new ArrayList<>();
-    ArrayList<Float> comparisonSiteAreaX2 = new ArrayList<>();
-    ArrayList<Float> comparisonLivingSpaceX3 = new ArrayList<>();
-    ArrayList<Float> comparisonNoOfGaragesX4 = new ArrayList<>();
-    ArrayList<Float> comparisonNoOfRoomsX5 = new ArrayList<>();
-    ArrayList<Float> comparisonNoOfBedroomsX6 = new ArrayList<>();
-    ArrayList<Float> comparisonAgeX7 = new ArrayList<>();
+    private ArrayList<Property> properties;
+    private ArrayList<Property> comparisonProperties;
 
     public static void main(String[] args) {
         Modelling application = new Modelling();
@@ -68,7 +53,7 @@ public class Modelling implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         //Called if we want to manually add data about a property via keyboard
         if (e.getActionCommand().equals("Keyboard")) {
-            form = new KeyboardInputJFrame(this);
+            setForm(new KeyboardInputJFrame(this));
         }
         //Called if we want to add data about a property via an external file
         if (e.getActionCommand().equals("File")) {
@@ -112,7 +97,7 @@ public class Modelling implements ActionListener {
         }
         // Table
         if (e.getActionCommand().equals("Table")) {
-            if (!priceY.isEmpty()) {
+            if (!properties.isEmpty()) {
                 TablesJFrame tables = new TablesJFrame(this, xChosen.getSelectedIndex());
             } else {
                 JOptionPane.showMessageDialog(null, "Please add data through keyboard or read in a file first.");
@@ -121,14 +106,14 @@ public class Modelling implements ActionListener {
         //Called if we want to plot a scatter chart.
         if (e.getActionCommand().equals("ScatterChart")) {
             // Check if there is any data at all
-            if (!priceY.isEmpty()) {
+            if (!properties.isEmpty()) {
                 XYDataset ds = createDataset(xChosen.getSelectedIndex());
                 if (ds != null) {
                     XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
                     renderer.setSeriesLinesVisible(0, false);
                     JFreeChart chart
                             = ChartFactory.createXYLineChart("Your Chart",
-                                    xChosen.getSelectedItem().toString(), "Price", ds, PlotOrientation.VERTICAL, true, true,
+                                    xChosen.getSelectedItem().toString(), "Price (£100,000's)", ds, PlotOrientation.VERTICAL, true, true,
                                     false);
                     XYPlot plot = (XYPlot) chart.getPlot();
                     plot.setRenderer(renderer);
@@ -142,7 +127,7 @@ public class Modelling implements ActionListener {
         //Called if we want to plot a scatter chart with a regression line.
         if (e.getActionCommand().equals("RegressionChart")) {
             // Check if there is any data at all
-            if (!priceY.isEmpty()) {
+            if (!properties.isEmpty()) {
                 XYDataset ds = createDatasetRegression(xChosen.getSelectedIndex());
                 if (ds != null) {
                     XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
@@ -150,7 +135,7 @@ public class Modelling implements ActionListener {
                     renderer.setSeriesShapesVisible(1, false);
                     JFreeChart chart
                             = ChartFactory.createXYLineChart("Your Chart",
-                                    xChosen.getSelectedItem().toString(), "Price", ds, PlotOrientation.VERTICAL, true, true,
+                                    xChosen.getSelectedItem().toString(), "Price (£100,000's)", ds, PlotOrientation.VERTICAL, true, true,
                                     false);
                     XYPlot plot = (XYPlot) chart.getPlot();
                     plot.setRenderer(renderer);
@@ -166,7 +151,7 @@ public class Modelling implements ActionListener {
         if (e.getActionCommand().equals("PredictionChart")) {
             float value = -1;
             // Check if there is any data at all
-            if (!priceY.isEmpty()) {
+            if (!properties.isEmpty()) {
                 try {
                     value = Float.parseFloat(JOptionPane.showInputDialog(null, "Input a value for prediction."));
                     // Check if the value is positive, if not throw an exception.
@@ -187,7 +172,7 @@ public class Modelling implements ActionListener {
                         renderer.setSeriesLinesVisible(2, false);
                         JFreeChart chart
                                 = ChartFactory.createXYLineChart("Your Chart",
-                                        xChosen.getSelectedItem().toString(), "Price", ds, PlotOrientation.VERTICAL, true, true,
+                                        xChosen.getSelectedItem().toString(), "Price (£100,000's)", ds, PlotOrientation.VERTICAL, true, true,
                                         false);
                         XYPlot plot = (XYPlot) chart.getPlot();
                         plot.setRenderer(renderer);
@@ -203,7 +188,7 @@ public class Modelling implements ActionListener {
 
         if (e.getActionCommand().equals("ComparisonChart")) {
             // Check if there is any data at all
-            if (!comparisonPriceY.isEmpty() && !comparisonPriceY.isEmpty()) {
+            if (!properties.isEmpty() && !comparisonProperties.isEmpty()) {
                 XYDataset ds = createDatasetComparison(xChosen.getSelectedIndex());
                 if (ds != null) {
                     XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
@@ -214,7 +199,7 @@ public class Modelling implements ActionListener {
                     JFreeChart chart
                             = ChartFactory.createXYLineChart("Your Chart",
                                     xChosen.getSelectedItem().toString(),
-                                    "Price", ds, PlotOrientation.VERTICAL,
+                                    "Price (£100,000's)", ds, PlotOrientation.VERTICAL,
                                     true, true, false);
                     Shape point = ShapeUtilities.createDiamond(2);
                     renderer.setSeriesShape(1, point);
@@ -233,7 +218,7 @@ public class Modelling implements ActionListener {
         if (e.getActionCommand().equals("BestMeasure")) {
             float value = -1;
             // Check if there is any data at all
-            if (!priceY.isEmpty() && !comparisonPriceY.isEmpty()) {
+            if (!properties.isEmpty() && !comparisonProperties.isEmpty()) {
                 try {
                     value = Float.parseFloat(JOptionPane.showInputDialog(null, "Input a value for prediction."));
                     // Check if the value is positive, if not throw an exception.
@@ -255,7 +240,7 @@ public class Modelling implements ActionListener {
                         renderer.setSeriesLinesVisible(3, false);
                         JFreeChart chart
                                 = ChartFactory.createXYLineChart("Your Chart",
-                                        xChosen.getSelectedItem().toString(), "Price", ds, PlotOrientation.VERTICAL, true, true,
+                                        xChosen.getItemAt(getHighestCorrelationCoefficient()).toString(), "Price (£100,000's)", ds, PlotOrientation.VERTICAL, true, true,
                                         false);
                         XYPlot plot = (XYPlot) chart.getPlot();
                         plot.setRenderer(renderer);
@@ -272,20 +257,13 @@ public class Modelling implements ActionListener {
 
     // Initialisation of the ArrayLists
     private void model() {
-        priceY = new ArrayList<>();
-        noOfBathroomsX1 = new ArrayList<>();
-        siteAreaX2 = new ArrayList<>();
-        livingSpaceX3 = new ArrayList<>();
-        noOfGaragesX4 = new ArrayList<>();
-        noOfRoomsX5 = new ArrayList<>();
-        noOfBedroomsX6 = new ArrayList<>();
-        ageX7 = new ArrayList<>();
+        properties = new ArrayList<>();
+        comparisonProperties = new ArrayList<>();
     }
 
     // GUI initialisation
     private void view() {
         Font fnt = new Font("Times New Roman", Font.PLAIN, 24);
-
         mainMenu = new JFrame();
         xChosen = new JComboBox();
         JMenuBar menuBar = new JMenuBar();
@@ -301,70 +279,58 @@ public class Modelling implements ActionListener {
         JMenuItem plotBestMeasure = new JMenuItem();
         JMenuItem tables = new JMenuItem();
         JMenuItem cc = new JMenuItem();
-
         inputMenu.setFont(fnt);
         chartMenu.setFont(fnt);
-
         addThroughKeyboard.setText("Enter data through keyboard");
         addThroughKeyboard.setFont(fnt);
         addThroughKeyboard.setActionCommand("Keyboard");
         addThroughKeyboard.addActionListener(this);
         inputMenu.add(addThroughKeyboard);
-
         addThroughFile.setText("Read in Training data set.txt");
         addThroughFile.setFont(fnt);
         addThroughFile.setActionCommand("File");
         addThroughFile.addActionListener(this);
         inputMenu.add(addThroughFile);
-
         addComparisonFile.setText("Read in comparison data set");
         addComparisonFile.setFont(fnt);
         addComparisonFile.setActionCommand("Comparison");
         addComparisonFile.addActionListener(this);
         inputMenu.add(addComparisonFile);
-
         tables.setText("View data tables for a specific independent variable");
         tables.setFont(fnt);
         tables.setActionCommand("Table");
         tables.addActionListener(this);
         inputMenu.add(tables);
-
         cc.setText("View highest correlation coefficient");
         cc.setFont(fnt);
         cc.setActionCommand("Cc");
         cc.addActionListener(this);
         inputMenu.add(cc);
-
         plotScatterChart.setText("Training data");
         plotScatterChart.setFont(fnt);
         plotScatterChart.setActionCommand("ScatterChart");
         plotScatterChart.addActionListener(this);
         chartMenu.add(plotScatterChart);
-
         plotRegressionChart.setText("Training data with a regression line");
         plotRegressionChart.setFont(fnt);
         plotRegressionChart.setActionCommand("RegressionChart");
         plotRegressionChart.addActionListener(this);
         chartMenu.add(plotRegressionChart);
-
         plotPredictionChart.setText("Training data with a regression line and a predicted variable");
         plotPredictionChart.setFont(fnt);
         plotPredictionChart.setActionCommand("PredictionChart");
         plotPredictionChart.addActionListener(this);
         chartMenu.add(plotPredictionChart);
-
         plotComparisonData.setText("Training data with a regression line and comparison data");
         plotComparisonData.setFont(fnt);
         plotComparisonData.setActionCommand("ComparisonChart");
         plotComparisonData.addActionListener(this);
         chartMenu.add(plotComparisonData);
-
         plotBestMeasure.setText("View training data with a \"best measure\" regression line, comparison data and a predicted variable");
         plotBestMeasure.setFont(fnt);
         plotBestMeasure.setActionCommand("BestMeasure");
         plotBestMeasure.addActionListener(this);
         inputMenu.add(plotBestMeasure);
-
         xChosen.setFont(fnt);
         xChosen.addActionListener(this);
         xChosen.setActionCommand("IndependentX");
@@ -376,74 +342,75 @@ public class Modelling implements ActionListener {
         xChosen.addItem("No. of rooms");
         xChosen.addItem("No. of bedrooms");
         xChosen.addItem("Age (years)");
-
         JFreeChart emptyChart = ChartFactory.createXYLineChart("Your Chart",
-                "Independent variable", "Price", null, PlotOrientation.VERTICAL, true, true,
+                "Independent variable", "Price (£100,000's)", null, PlotOrientation.VERTICAL, true, true,
                 false);
         chartDisplay = new ChartPanel(emptyChart);
-
         mainMenu.setJMenuBar(menuBar);
         menuBar.add(inputMenu);
         menuBar.add(xChosen);
         menuBar.add(chartMenu);
         mainMenu.add(chartDisplay);
         mainMenu.setExtendedState(JFrame.MAXIMIZED_BOTH);
-
         mainMenu.setTitle("Coursework");
         mainMenu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
         mainMenu.setVisible(true);
     }
 
-    // Method is used to store data inputted through the keyboard into the corresponding ArrayLists
-    public void storeKeyboardInputData() {
-        noOfBathroomsX1.add(Float.parseFloat(form.getFieldBathrooms().getText()));
-        siteAreaX2.add(Float.parseFloat(form.getFieldAreaSite().getText()));
-        livingSpaceX3.add(Float.parseFloat(form.getFieldLivingSpace().getText()));
-        noOfGaragesX4.add((float) Integer.parseInt(form.getFieldGarages().getText()));
-        noOfRoomsX5.add((float) Integer.parseInt(form.getFieldRooms().getText()));
-        noOfBedroomsX6.add((float) Integer.parseInt(form.getFieldBedrooms().getText()));
-        ageX7.add((float) Integer.parseInt(form.getFieldAge().getText()));
-        priceY.add(Float.parseFloat(form.getFieldPrice().getText()));
-    }
-
-    public void setForm(KeyboardInputJFrame form) {
-        this.form = form;
-    }
-
-    //Creation of a data set for the chart
-    private XYDataset createDataset(int chosenXID) {
-        // This ArrayList will store a reference to the ArrayList which holds the
-        // selected independant variables and will not be modified, only read.
-        ArrayList<Float> chosen = null;
+    //A method to determine which independent variable is selected. Returns an ArrayList
+    // of all values of a chosen independent variable.
+    private ArrayList<Float> determineIndependentVariable(int chosenXID, ArrayList<Property> properties) {
+        // This ArrayList will store all the values of a chosen independent variable.
+        ArrayList<Float> chosen = new ArrayList<>();
         // A switch statement to determine which independant variable was selected
         // from the JComboBox to create a chart.
         switch (chosenXID) {
             case 0:
+                chosen = null;
                 JOptionPane.showMessageDialog(null, "Please select an independent variable above to continue.");
                 break;
             case 1:
-                chosen = noOfBathroomsX1;
+                for (int i = 0; i < properties.size(); i++) {
+                    chosen.add(properties.get(i).getNoOfBathroomsX1());
+                }
                 break;
             case 2:
-                chosen = siteAreaX2;
+                for (int i = 0; i < properties.size(); i++) {
+                    chosen.add(properties.get(i).getSiteAreaX2());
+                }
                 break;
             case 3:
-                chosen = livingSpaceX3;
+                for (int i = 0; i < properties.size(); i++) {
+                    chosen.add(properties.get(i).getLivingSpaceX3());
+                }
                 break;
             case 4:
-                chosen = noOfGaragesX4;
+                for (int i = 0; i < properties.size(); i++) {
+                    chosen.add(properties.get(i).getNoOfGaragesX4());
+                }
                 break;
             case 5:
-                chosen = noOfRoomsX5;
+                for (int i = 0; i < properties.size(); i++) {
+                    chosen.add(properties.get(i).getNoOfRoomsX5());
+                }
                 break;
             case 6:
-                chosen = noOfBedroomsX6;
+                for (int i = 0; i < properties.size(); i++) {
+                    chosen.add(properties.get(i).getNoOfBedroomsX6());
+                }
                 break;
             case 7:
-                chosen = ageX7;
+                for (int i = 0; i < properties.size(); i++) {
+                    chosen.add(properties.get(i).getAgeX7());
+                }
                 break;
         }
+        return chosen;
+    }
+
+    //Creation of a data set for the chart
+    private XYDataset createDataset(int chosenXID) {
+        ArrayList<Float> chosen = determineIndependentVariable(chosenXID, properties);
         // Determine if an independant variable is selected. If not, a null is
         // returned instead of a dataset and the graph stays either empty 
         // if no chart has been created before or the last correctly created 
@@ -454,7 +421,7 @@ public class Modelling implements ActionListener {
             // to display a regression line.
             XYSeries scatter = new XYSeries(xChosen.getSelectedItem().toString());
             for (int i = 0; i < chosen.size(); i++) {
-                scatter.add(chosen.get(i), priceY.get(i));
+                scatter.add((float) chosen.get(i), (float) properties.get(i).getPriceY());
             }
             dataset.addSeries(scatter);
             return dataset;
@@ -465,37 +432,7 @@ public class Modelling implements ActionListener {
 
     //Creation of a data set for the chart and the regression line
     private XYDataset createDatasetRegression(int chosenXID) {
-        // This ArrayList will store a reference to the ArrayList which holds the
-        // selected independant variables and will not be modified, only read.
-        ArrayList<Float> chosen = null;
-        // A switch statement to determine which independant variable was selected
-        // from the JComboBox to create a chart.
-        switch (chosenXID) {
-            case 0:
-                JOptionPane.showMessageDialog(null, "Please select an independent variable above to continue.");
-                break;
-            case 1:
-                chosen = noOfBathroomsX1;
-                break;
-            case 2:
-                chosen = siteAreaX2;
-                break;
-            case 3:
-                chosen = livingSpaceX3;
-                break;
-            case 4:
-                chosen = noOfGaragesX4;
-                break;
-            case 5:
-                chosen = noOfRoomsX5;
-                break;
-            case 6:
-                chosen = noOfBedroomsX6;
-                break;
-            case 7:
-                chosen = ageX7;
-                break;
-        }
+        ArrayList<Float> chosen = determineIndependentVariable(chosenXID, properties);
         // Determine if an independant variable is selected. If not, a null is
         // returned instead of a dataset and the graph stays either empty 
         // if no chart has been created before or the last correctly created 
@@ -508,8 +445,10 @@ public class Modelling implements ActionListener {
             XYSeries regression = new XYSeries("Regression line");
             float largestX = chosen.get(0);
             float smallestX = chosen.get(0);
+            ArrayList<Float> prices = new ArrayList<>();
             for (int i = 0; i < chosen.size(); i++) {
-                scatter.add(chosen.get(i), priceY.get(i));
+                prices.add(properties.get(i).getPriceY());
+                scatter.add((float) chosen.get(i), (float) properties.get(i).getPriceY());
                 if (chosen.get(i) > largestX) {
                     largestX = chosen.get(i);
                 }
@@ -517,7 +456,7 @@ public class Modelling implements ActionListener {
                     smallestX = chosen.get(i);
                 }
             }
-            RegressionAlgorithm alg = new RegressionAlgorithm(chosen, priceY);
+            RegressionAlgorithm alg = new RegressionAlgorithm(chosen, prices);
             float y1 = alg.getBeta1() * smallestX + alg.getBeta0();
             float y2 = alg.getBeta1() * largestX + alg.getBeta0();
             regression.add(smallestX, y1);
@@ -532,37 +471,7 @@ public class Modelling implements ActionListener {
 
     //Creation of a data set for the chart, the regression line and aprediction
     private XYDataset createDatasetPrediction(int chosenXID, float value) {
-        // This ArrayList will store a reference to the ArrayList which holds the
-        // selected independant variables and will not be modified, only read.
-        ArrayList<Float> chosen = null;
-        // A switch statement to determine which independant variable was selected
-        // from the JComboBox to create a chart.
-        switch (chosenXID) {
-            case 0:
-                JOptionPane.showMessageDialog(null, "Please select an independent variable above to continue.");
-                break;
-            case 1:
-                chosen = noOfBathroomsX1;
-                break;
-            case 2:
-                chosen = siteAreaX2;
-                break;
-            case 3:
-                chosen = livingSpaceX3;
-                break;
-            case 4:
-                chosen = noOfGaragesX4;
-                break;
-            case 5:
-                chosen = noOfRoomsX5;
-                break;
-            case 6:
-                chosen = noOfBedroomsX6;
-                break;
-            case 7:
-                chosen = ageX7;
-                break;
-        }
+        ArrayList<Float> chosen = determineIndependentVariable(chosenXID, properties);
         // Determine if an independant variable is selected. If not, a null is
         // returned instead of a dataset and the graph stays either empty 
         // if no chart has been created before or the last correctly created 
@@ -576,8 +485,10 @@ public class Modelling implements ActionListener {
             XYSeries prediction = new XYSeries("Predicted variable");
             float largestX = chosen.get(0);
             float smallestX = chosen.get(0);
+            ArrayList<Float> prices = new ArrayList<>();
             for (int i = 0; i < chosen.size(); i++) {
-                scatter.add(chosen.get(i), priceY.get(i));
+                prices.add(properties.get(i).getPriceY());
+                scatter.add((float) chosen.get(i), (float) properties.get(i).getPriceY());
                 if (chosen.get(i) > largestX) {
                     largestX = chosen.get(i);
                 }
@@ -585,11 +496,10 @@ public class Modelling implements ActionListener {
                     smallestX = chosen.get(i);
                 }
             }
-            RegressionAlgorithm alg = new RegressionAlgorithm(chosen, priceY);
+            RegressionAlgorithm alg = new RegressionAlgorithm(chosen, prices);
             float y1 = alg.getBeta1() * smallestX + alg.getBeta0();
             float y2 = alg.getBeta1() * largestX + alg.getBeta0();
             float y3 = alg.getBeta1() * value + alg.getBeta0();
-
             regression.add(smallestX, y1);
             regression.add(largestX, y2);
             prediction.add(value, y3);
@@ -603,45 +513,8 @@ public class Modelling implements ActionListener {
     }
 
     private XYDataset createDatasetComparison(int chosenXID) {
-        // This ArrayList will store a reference to the ArrayList which holds the
-        // selected independant variables and will not be modified, only read.
-        ArrayList<Float> comparisonChosen = null;
-        ArrayList<Float> chosen = null;
-        // A switch statement to determine which independant variable was selected
-        // from the JComboBox to create a chart.
-        switch (chosenXID) {
-            case 0:
-                JOptionPane.showMessageDialog(null, "Please select an independent variable above to continue.");
-                break;
-            case 1:
-                comparisonChosen = comparisonNoOfBathroomsX1;
-                chosen = noOfBathroomsX1;
-                break;
-            case 2:
-                comparisonChosen = comparisonSiteAreaX2;
-                chosen = siteAreaX2;
-                break;
-            case 3:
-                comparisonChosen = comparisonLivingSpaceX3;
-                chosen = livingSpaceX3;
-                break;
-            case 4:
-                comparisonChosen = comparisonNoOfGaragesX4;
-                chosen = noOfGaragesX4;
-                break;
-            case 5:
-                comparisonChosen = comparisonNoOfRoomsX5;
-                chosen = noOfRoomsX5;
-                break;
-            case 6:
-                comparisonChosen = comparisonNoOfBedroomsX6;
-                chosen = noOfBedroomsX6;
-                break;
-            case 7:
-                comparisonChosen = comparisonAgeX7;
-                chosen = ageX7;
-                break;
-        }
+        ArrayList<Float> chosen = determineIndependentVariable(chosenXID, properties);
+        ArrayList<Float> comparisonChosen = determineIndependentVariable(chosenXID, comparisonProperties);
         // Determine if an independant variable is selected. If not, a null is
         // returned instead of a dataset and the graph stays either empty 
         // if no chart has been created before or the last correctly created 
@@ -655,8 +528,10 @@ public class Modelling implements ActionListener {
             XYSeries comparisonScatter = new XYSeries("Comparison set");
             float largestX = chosen.get(0);
             float smallestX = chosen.get(0);
+            ArrayList<Float> prices = new ArrayList<>();
             for (int i = 0; i < chosen.size(); i++) {
-                scatter.add(chosen.get(i), priceY.get(i));
+                prices.add(properties.get(i).getPriceY());
+                scatter.add((float) chosen.get(i), (float) properties.get(i).getPriceY());
                 if (chosen.get(i) > largestX) {
                     largestX = chosen.get(i);
                 }
@@ -664,7 +539,7 @@ public class Modelling implements ActionListener {
                     smallestX = chosen.get(i);
                 }
             }
-            RegressionAlgorithm alg = new RegressionAlgorithm(chosen, priceY);
+            RegressionAlgorithm alg = new RegressionAlgorithm(chosen, prices);
             float y1 = alg.getBeta1() * smallestX + alg.getBeta0();
             float y2 = alg.getBeta1() * largestX + alg.getBeta0();
             regression.add(smallestX, y1);
@@ -672,7 +547,7 @@ public class Modelling implements ActionListener {
             // Create a series for the display of scatter points and a series
             // to display a regression line.
             for (int i = 0; i < comparisonChosen.size(); i++) {
-                comparisonScatter.add(comparisonChosen.get(i), comparisonPriceY.get(i));
+                comparisonScatter.add((float) comparisonChosen.get(i), (float) comparisonProperties.get(i).getPriceY());
             }
             dataset.addSeries(scatter);
             dataset.addSeries(regression);
@@ -684,45 +559,8 @@ public class Modelling implements ActionListener {
     }
 
     private XYDataset createDatasetBestMeasure(int chosenXID, float value) {
-        // This ArrayList will store a reference to the ArrayList which holds the
-        // selected independant variables and will not be modified, only read.
-        ArrayList<Float> comparisonChosen = null;
-        ArrayList<Float> chosen = null;
-        // A switch statement to determine which independant variable was selected
-        // from the JComboBox to create a chart.
-        switch (chosenXID) {
-            case 0:
-                JOptionPane.showMessageDialog(null, "Please select an independent variable above to continue.");
-                break;
-            case 1:
-                comparisonChosen = comparisonNoOfBathroomsX1;
-                chosen = noOfBathroomsX1;
-                break;
-            case 2:
-                comparisonChosen = comparisonSiteAreaX2;
-                chosen = siteAreaX2;
-                break;
-            case 3:
-                comparisonChosen = comparisonLivingSpaceX3;
-                chosen = livingSpaceX3;
-                break;
-            case 4:
-                comparisonChosen = comparisonNoOfGaragesX4;
-                chosen = noOfGaragesX4;
-                break;
-            case 5:
-                comparisonChosen = comparisonNoOfRoomsX5;
-                chosen = noOfRoomsX5;
-                break;
-            case 6:
-                comparisonChosen = comparisonNoOfBedroomsX6;
-                chosen = noOfBedroomsX6;
-                break;
-            case 7:
-                comparisonChosen = comparisonAgeX7;
-                chosen = ageX7;
-                break;
-        }
+        ArrayList<Float> chosen = determineIndependentVariable(chosenXID, properties);
+        ArrayList<Float> comparisonChosen = determineIndependentVariable(chosenXID, comparisonProperties);
         // Determine if an independant variable is selected. If not, a null is
         // returned instead of a dataset and the graph stays either empty 
         // if no chart has been created before or the last correctly created 
@@ -737,8 +575,10 @@ public class Modelling implements ActionListener {
             XYSeries comparisonScatter = new XYSeries("Comparison set");
             float largestX = chosen.get(0);
             float smallestX = chosen.get(0);
+            ArrayList<Float> prices = new ArrayList<>();
             for (int i = 0; i < chosen.size(); i++) {
-                scatter.add(chosen.get(i), priceY.get(i));
+                prices.add(properties.get(i).getPriceY());
+                scatter.add((float) chosen.get(i), (float) properties.get(i).getPriceY());
                 if (chosen.get(i) > largestX) {
                     largestX = chosen.get(i);
                 }
@@ -760,7 +600,7 @@ public class Modelling implements ActionListener {
                     smallestX = comparisonChosen.get(i);
                 }
             }
-            RegressionAlgorithm alg = new RegressionAlgorithm(chosen, priceY);
+            RegressionAlgorithm alg = new RegressionAlgorithm(chosen, prices);
             float y1 = alg.getBeta1() * smallestX + alg.getBeta0();
             float y2 = alg.getBeta1() * largestX + alg.getBeta0();
             float y3 = alg.getBeta1() * value + alg.getBeta0();
@@ -771,7 +611,7 @@ public class Modelling implements ActionListener {
             // to display a regression line.
 
             for (int i = 0; i < comparisonChosen.size(); i++) {
-                comparisonScatter.add(comparisonChosen.get(i), comparisonPriceY.get(i));
+                comparisonScatter.add((float) comparisonChosen.get(i), (float) comparisonProperties.get(i).getPriceY());
             }
             dataset.addSeries(scatter);
             dataset.addSeries(regression);
@@ -787,7 +627,7 @@ public class Modelling implements ActionListener {
     private void readDataFromFile() throws FileNotFoundException {
         //Read and store the lines into an ArrayList
         Scanner scan = new Scanner(new File("Training Data Set.txt"));
-        ArrayList<String> list = new ArrayList();
+        ArrayList<String> list = new ArrayList<>();
         while (scan.hasNext()) {
             list.add(scan.nextLine());
         }
@@ -795,40 +635,62 @@ public class Modelling implements ActionListener {
         for (int i = 0; i < list.size(); i++) {
             String[] tmp = new String[8];
             tmp = list.get(i).split("\t");
-            priceY.add(Float.parseFloat(tmp[1]));
-            noOfBathroomsX1.add(Float.parseFloat(tmp[2]));
-            siteAreaX2.add(Float.parseFloat(tmp[3]));
-            livingSpaceX3.add(Float.parseFloat(tmp[4]));
-            noOfGaragesX4.add((float) Integer.parseInt(tmp[5]));
-            noOfRoomsX5.add((float) Integer.parseInt(tmp[6]));
-            noOfBedroomsX6.add((float) Integer.parseInt(tmp[7]));
-            ageX7.add((float) Integer.parseInt(tmp[8]));
+            Property newProperty = new Property(Property.getIdCount(), Float.parseFloat(tmp[2]),
+                    Float.parseFloat(tmp[3]), Float.parseFloat(tmp[4]),
+                    (float) Integer.parseInt(tmp[5]), (float) Integer.parseInt(tmp[6]),
+                    (float) Integer.parseInt(tmp[7]), (float) Integer.parseInt(tmp[8]),
+                    Float.parseFloat(tmp[1]));
+            Property.setIdCount(Property.getIdCount() + 1);
+            properties.add(newProperty);
         }
     }
 
     private int getHighestCorrelationCoefficient() {
-        RegressionAlgorithm ra = new RegressionAlgorithm(noOfBathroomsX1, priceY);
         ArrayList<Float> coef = new ArrayList<>();
+        ArrayList<Float> price = new ArrayList<>();
+        ArrayList<Float> noOfBathrooms = new ArrayList<>();
+        ArrayList<Float> siteArea = new ArrayList<>();
+        ArrayList<Float> livingSpace = new ArrayList<>();
+        ArrayList<Float> noOfGarages = new ArrayList<>();
+        ArrayList<Float> noOfRooms = new ArrayList<>();
+        ArrayList<Float> noOfBedrooms = new ArrayList<>();
+        ArrayList<Float> age = new ArrayList<>();
+        for (int i = 0; i < properties.size(); i++) {
+            price.add(properties.get(i).getPriceY());
+            noOfBathrooms.add(properties.get(i).getNoOfBathroomsX1());
+            siteArea.add(properties.get(i).getSiteAreaX2());
+            livingSpace.add(properties.get(i).getLivingSpaceX3());
+            noOfGarages.add(properties.get(i).getNoOfGaragesX4());
+            noOfRooms.add(properties.get(i).getNoOfRoomsX5());
+            noOfBedrooms.add(properties.get(i).getNoOfBedroomsX6());
+            age.add(properties.get(i).getAgeX7());
+            
+        }
+        RegressionAlgorithm ra = new RegressionAlgorithm(noOfBathrooms, price);
         coef.add(ra.getR2());
-        ra = new RegressionAlgorithm(siteAreaX2, priceY);
+        ra = new RegressionAlgorithm(siteArea, price);
         coef.add(ra.getR2());
-        ra = new RegressionAlgorithm(livingSpaceX3, priceY);
+        ra = new RegressionAlgorithm(livingSpace, price);
         coef.add(ra.getR2());
-        ra = new RegressionAlgorithm(noOfGaragesX4, priceY);
+        ra = new RegressionAlgorithm(noOfGarages, price);
         coef.add(ra.getR2());
-        ra = new RegressionAlgorithm(noOfRoomsX5, priceY);
+        ra = new RegressionAlgorithm(noOfRooms, price);
         coef.add(ra.getR2());
-        ra = new RegressionAlgorithm(noOfBedroomsX6, priceY);
+        ra = new RegressionAlgorithm(noOfBedrooms, price);
         coef.add(ra.getR2());
-        ra = new RegressionAlgorithm(ageX7, priceY);
+        ra = new RegressionAlgorithm(age, price);
         coef.add(ra.getR2());
         float[][] coeff = new float[coef.size()][2];
-        for (int i = 0; i < coef.size(); i++) {
+        for (int i = 0;
+                i < coef.size();
+                i++) {
             coeff[i][0] = (float) i;
             coeff[i][1] = coef.get(i);
         }
         float biggest = 0;
-        for (int i = 0; i < coef.size(); i++) {
+        for (int i = 0;
+                i < coef.size();
+                i++) {
             for (int j = 1; j < coef.size(); j++) {
                 if (coeff[j - 1][1] < coeff[j][1]) {
                     float tempindex = coeff[j - 1][0];
@@ -840,109 +702,49 @@ public class Modelling implements ActionListener {
                 }
             }
         }
-//        switch ((int) coeff[0][0] + 1) {
-//            case 1:
-//                return noOfBathroomsX1;
-//            case 2:
-//                return siteAreaX2;
-//            case 3:
-//                return livingSpaceX3;
-//            case 4:
-//                return noOfGaragesX4;
-//            case 5:
-//                return noOfRoomsX5;
-//            case 6:
-//                return noOfBedroomsX6;
-//            case 7:
-//                return ageX7;
-//        }
         return (int) coeff[0][0] + 1;
     }
 
     private void readDataFromFile(String town) throws FileNotFoundException {
         //Read and store the lines into an ArrayList
         Scanner scan = new Scanner(new File(town + ".txt"));
-        ArrayList<String> list = new ArrayList();
-        list.clear();
-        comparisonPriceY.clear();
-        comparisonNoOfBathroomsX1.clear();
-        comparisonSiteAreaX2.clear();
-        comparisonLivingSpaceX3.clear();
-        comparisonNoOfGaragesX4.clear();
-        comparisonNoOfRoomsX5.clear();
-        comparisonNoOfBedroomsX6.clear();
-        comparisonAgeX7.clear();
+        ArrayList<String> list = new ArrayList<>();
+        comparisonProperties.clear();
         while (scan.hasNext()) {
             list.add(scan.nextLine());
         }
-        // Iterative process to store each peace of data into corresponding ArrayLists
+        // Iterative process to store each peace of data
         for (int i = 0; i < list.size(); i++) {
-            String[] temp = new String[8];
-            temp = list.get(i).split("\t");
-            comparisonPriceY.add(Float.parseFloat(temp[1]));
-            comparisonNoOfBathroomsX1.add(Float.parseFloat(temp[2]));
-            comparisonSiteAreaX2.add(Float.parseFloat(temp[3]));
-            comparisonLivingSpaceX3.add(Float.parseFloat(temp[4]));
-            comparisonNoOfGaragesX4.add((float) Integer.parseInt(temp[5]));
-            comparisonNoOfRoomsX5.add((float) Integer.parseInt(temp[6]));
-            comparisonNoOfBedroomsX6.add((float) Integer.parseInt(temp[7]));
-            comparisonAgeX7.add((float) Integer.parseInt(temp[8]));
+            String[] tmp = new String[8];
+            tmp = list.get(i).split("\t");
+            Property newProperty = new Property(i, Float.parseFloat(tmp[2]),
+                    Float.parseFloat(tmp[3]), Float.parseFloat(tmp[4]),
+                    (float) Integer.parseInt(tmp[5]), (float) Integer.parseInt(tmp[6]),
+                    (float) Integer.parseInt(tmp[7]), (float) Integer.parseInt(tmp[8]),
+                    Float.parseFloat(tmp[1]));
+            comparisonProperties.add(newProperty);
         }
     }
 
     /**
-     * @return the priceY
+     * @param form the form to set
      */
-    public ArrayList<Float> getPriceY() {
-        return priceY;
+    public void setForm(KeyboardInputJFrame form) {
+        this.form = form;
     }
 
     /**
-     * @return the noOfBathroomsX1
+     * @return the properties
      */
-    public ArrayList<Float> getNoOfBathroomsX1() {
-        return noOfBathroomsX1;
+    public ArrayList<Property> getProperties() {
+        return properties;
     }
 
     /**
-     * @return the siteAreaX2
+     * @return the comparisonProperties
      */
-    public ArrayList<Float> getSiteAreaX2() {
-        return siteAreaX2;
+    public ArrayList<Property> getComparisonProperties() {
+        return comparisonProperties;
     }
 
-    /**
-     * @return the livingSpaceX3
-     */
-    public ArrayList<Float> getLivingSpaceX3() {
-        return livingSpaceX3;
-    }
-
-    /**
-     * @return the noOfGaragesX4
-     */
-    public ArrayList<Float> getNoOfGaragesX4() {
-        return noOfGaragesX4;
-    }
-
-    /**
-     * @return the noOfRoomsX5
-     */
-    public ArrayList<Float> getNoOfRoomsX5() {
-        return noOfRoomsX5;
-    }
-
-    /**
-     * @return the noOfBedroomsX6
-     */
-    public ArrayList<Float> getNoOfBedroomsX6() {
-        return noOfBedroomsX6;
-    }
-
-    /**
-     * @return the ageX7
-     */
-    public ArrayList<Float> getAgeX7() {
-        return ageX7;
-    }
 }
