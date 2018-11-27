@@ -1,5 +1,6 @@
 package modelling;
 
+import java.awt.Dimension;
 import javax.swing.*;
 import java.awt.Font;
 import java.awt.Shape;
@@ -108,7 +109,7 @@ public class Modelling implements ActionListener {
         if (e.getActionCommand().equals("ScatterChart")) {
             // Check if there is any data at all
             if (!properties.isEmpty()) {
-                XYDataset ds = createDataset(xChosen.getSelectedIndex());
+                XYSeriesCollection ds = createDataset(xChosen.getSelectedIndex());
                 if (ds != null) {
                     XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
                     renderer.setSeriesLinesVisible(0, false);
@@ -131,7 +132,7 @@ public class Modelling implements ActionListener {
         if (e.getActionCommand().equals("RegressionChart")) {
             // Check if there is any data at all
             if (!properties.isEmpty()) {
-                XYDataset ds = createDatasetRegression(xChosen.getSelectedIndex());
+                XYSeriesCollection ds = createDatasetRegression(xChosen.getSelectedIndex());
                 if (ds != null) {
                     XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
                     renderer.setSeriesLinesVisible(0, false);
@@ -169,7 +170,7 @@ public class Modelling implements ActionListener {
                 }
                 // Check if the value is postive.
                 if (value > 0) {
-                    XYDataset ds = createDatasetPrediction(xChosen.getSelectedIndex(), value);
+                    XYSeriesCollection ds = createDatasetPrediction(xChosen.getSelectedIndex(), value);
                     if (ds != null) {
                         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
                         renderer.setSeriesLinesVisible(0, false);
@@ -186,6 +187,9 @@ public class Modelling implements ActionListener {
                         mainMenu.setVisible(true);
                         tables = new TablesJFrame(this);
                         tables.createTables(xChosen.getSelectedIndex());
+
+                        JOptionPane.showMessageDialog(null, "The predicted price is £"
+                                + Float.toString((float) Math.ceil(ds.getSeries(2).getDataItem(0).getYValue() * 100000)));
                     }
                 }
             } else {
@@ -196,7 +200,7 @@ public class Modelling implements ActionListener {
         if (e.getActionCommand().equals("ComparisonChart")) {
             // Check if there is any data at all
             if (!properties.isEmpty() && !comparisonProperties.isEmpty()) {
-                XYDataset ds = createDatasetComparison(xChosen.getSelectedIndex());
+                XYSeriesCollection ds = createDatasetComparison(xChosen.getSelectedIndex());
                 if (ds != null) {
                     XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
                     renderer.setSeriesLinesVisible(0, false);
@@ -227,7 +231,7 @@ public class Modelling implements ActionListener {
         if (e.getActionCommand().equals("BestMeasure")) {
             // Check if there is any data at all
             if (!properties.isEmpty() && !comparisonProperties.isEmpty()) {
-                XYDataset ds = createDatasetBestMeasure(getHighestCorrelationCoefficient());
+                XYSeriesCollection ds = createDatasetBestMeasure(getHighestCorrelationCoefficient());
                 if (ds != null) {
                     XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
                     renderer.setSeriesLinesVisible(0, false);
@@ -260,67 +264,29 @@ public class Modelling implements ActionListener {
     // GUI initialisation
     private void view() {
         Font fnt = new Font("Times New Roman", Font.PLAIN, 24);
+
         mainMenu = new JFrame();
         xChosen = new JComboBox();
         JMenuBar menuBar = new JMenuBar();
         JMenu inputMenu = new JMenu("Input data");
         JMenu chartMenu = new JMenu("Choose a chart");
-        JMenuItem addThroughKeyboard = new JMenuItem();
-        JMenuItem addThroughFile = new JMenuItem();
-        JMenuItem addComparisonFile = new JMenuItem();
-        JMenuItem plotScatterChart = new JMenuItem();
-        JMenuItem plotRegressionChart = new JMenuItem();
-        JMenuItem plotPredictionChart = new JMenuItem();
-        JMenuItem plotComparisonData = new JMenuItem();
-        JMenuItem plotBestMeasure = new JMenuItem();
-        JMenuItem tables = new JMenuItem();
+        JMenu viewMenu = new JMenu("View");
+
         inputMenu.setFont(fnt);
         chartMenu.setFont(fnt);
-        addThroughKeyboard.setText("Enter data through keyboard");
-        addThroughKeyboard.setFont(fnt);
-        addThroughKeyboard.setActionCommand("Keyboard");
-        addThroughKeyboard.addActionListener(this);
-        inputMenu.add(addThroughKeyboard);
-        addThroughFile.setText("Read in training data");
-        addThroughFile.setFont(fnt);
-        addThroughFile.setActionCommand("File");
-        addThroughFile.addActionListener(this);
-        inputMenu.add(addThroughFile);
-        addComparisonFile.setText("Read in comparison data");
-        addComparisonFile.setFont(fnt);
-        addComparisonFile.setActionCommand("Comparison");
-        addComparisonFile.addActionListener(this);
-        inputMenu.add(addComparisonFile);
-        tables.setText("View data summary tables");
-        tables.setFont(fnt);
-        tables.setActionCommand("Table");
-        tables.addActionListener(this);
-        inputMenu.add(tables);
-        plotScatterChart.setText("Training data");
-        plotScatterChart.setFont(fnt);
-        plotScatterChart.setActionCommand("ScatterChart");
-        plotScatterChart.addActionListener(this);
-        chartMenu.add(plotScatterChart);
-        plotRegressionChart.setText("Training data with a regression line");
-        plotRegressionChart.setFont(fnt);
-        plotRegressionChart.setActionCommand("RegressionChart");
-        plotRegressionChart.addActionListener(this);
-        chartMenu.add(plotRegressionChart);
-        plotPredictionChart.setText("Training data with a regression line and a predicted variable");
-        plotPredictionChart.setFont(fnt);
-        plotPredictionChart.setActionCommand("PredictionChart");
-        plotPredictionChart.addActionListener(this);
-        chartMenu.add(plotPredictionChart);
-        plotComparisonData.setText("Training data with a regression line and comparison data");
-        plotComparisonData.setFont(fnt);
-        plotComparisonData.setActionCommand("ComparisonChart");
-        plotComparisonData.addActionListener(this);
-        chartMenu.add(plotComparisonData);
-        plotBestMeasure.setText("View training data with a \"best measure\" regression line, comparison data and a predicted variable");
-        plotBestMeasure.setFont(fnt);
-        plotBestMeasure.setActionCommand("BestMeasure");
-        plotBestMeasure.addActionListener(this);
-        inputMenu.add(plotBestMeasure);
+        viewMenu.setFont(fnt);
+
+        inputMenu.add(makeMenuItem("Enter data through keyboard", fnt, "Keyboard"));
+        inputMenu.add(makeMenuItem("Read in training data", fnt, "File"));
+        inputMenu.add(makeMenuItem("Read in a comparison data", fnt, "Comparison"));
+        chartMenu.add(makeMenuItem("Training data", fnt, "ScatterChart"));
+        chartMenu.add(makeMenuItem("Training data with a regression line", fnt, "RegressionChart"));
+        chartMenu.add(makeMenuItem("Training data with a regression line and a predicted variable", fnt, "PredictionChart"));
+        chartMenu.add(makeMenuItem("Training data with a regression line and comparison data", fnt, "ComparisonChart"));
+        chartMenu.add(makeMenuItem("\"Best measure\" training data with a regression line and comparison data", fnt, "BestMeasure"));
+        viewMenu.add(makeMenuItem("Data summary tables", fnt, "Table"));
+        
+        xChosen.setMaximumSize(new Dimension(500, 500));
         xChosen.setFont(fnt);
         xChosen.addActionListener(this);
         xChosen.setActionCommand("IndependentX");
@@ -340,6 +306,7 @@ public class Modelling implements ActionListener {
         menuBar.add(inputMenu);
         menuBar.add(xChosen);
         menuBar.add(chartMenu);
+        menuBar.add(viewMenu);
         mainMenu.add(chartDisplay);
         mainMenu.setExtendedState(JFrame.MAXIMIZED_BOTH);
         mainMenu.setTitle("Coursework");
@@ -400,7 +367,7 @@ public class Modelling implements ActionListener {
     }
 
     //Creation of a data set for the chart
-    private XYDataset createDataset(int chosenXID) {
+    private XYSeriesCollection createDataset(int chosenXID) {
         // An ArrayList to store all the values of an independent variable.
         ArrayList<Float> chosen = determineIndependentVariable(chosenXID, properties);
         // Determine if an independant variable is selected. If not, a null is
@@ -423,7 +390,7 @@ public class Modelling implements ActionListener {
     }
 
     //Creation of a data set for the chart and the regression line.
-    private XYDataset createDatasetRegression(int chosenXID) {
+    private XYSeriesCollection createDatasetRegression(int chosenXID) {
         // An ArrayList to store all the values of an independent variable.
         ArrayList<Float> chosen = determineIndependentVariable(chosenXID, properties);
         // Determine if an independant variable is selected. If not, a null is
@@ -469,7 +436,7 @@ public class Modelling implements ActionListener {
     }
 
     //Creation of a data set for the chart, the regression line and a prediction
-    private XYDataset createDatasetPrediction(int chosenXID, float value) {
+    private XYSeriesCollection createDatasetPrediction(int chosenXID, float value) {
         // An ArrayList to store all the values of an independent variable.
         ArrayList<Float> chosen = determineIndependentVariable(chosenXID, properties);
         // Determine if an independant variable is selected. If not, a null is
@@ -520,7 +487,7 @@ public class Modelling implements ActionListener {
     }
 
     //Creation of a data set for the chart, the regression line and comparison data
-    private XYDataset createDatasetComparison(int chosenXID) {
+    private XYSeriesCollection createDatasetComparison(int chosenXID) {
         // An ArrayList to store all the values of an independent variable.
         ArrayList<Float> chosen = determineIndependentVariable(chosenXID, properties);
         // An ArrayList to store all the values of an independent variable from the comparison data.
@@ -574,7 +541,7 @@ public class Modelling implements ActionListener {
     }
 
     //Creation of a data set for the "best measure " chart, the regression line and a comparison data
-    private XYDataset createDatasetBestMeasure(int chosenXID) {
+    private XYSeriesCollection createDatasetBestMeasure(int chosenXID) {
         // An ArrayList to store all the values of an independent variable.
         ArrayList<Float> chosen = determineIndependentVariable(chosenXID, properties);
         // An ArrayList to store all the values of an independent variable from the comparison data.
@@ -737,6 +704,18 @@ public class Modelling implements ActionListener {
                     Float.parseFloat(tmp[1]));
             comparisonProperties.add(newProperty);
         }
+    }
+
+    //Method to create a menuItem
+    private JMenuItem makeMenuItem(String name, Font fnt, String actionCommand) {
+
+        JMenuItem menuItem = new JMenuItem();
+        menuItem.setText(name);
+        menuItem.setFont(fnt);
+        menuItem.setActionCommand(actionCommand);
+        menuItem.addActionListener(this);
+
+        return menuItem;
     }
 
     /**
