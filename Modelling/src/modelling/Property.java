@@ -6,8 +6,10 @@
 package modelling;
 
 /**
- *
- * @author Maks Domas Smirnov
+ * Property class holds all the information about a specific property.
+ * 
+ * @author Maks Domas Smirnov, ID: ms8749c
+ * @author Roshaan Nazir, ID: rn6706a
  */
 public class Property {
 

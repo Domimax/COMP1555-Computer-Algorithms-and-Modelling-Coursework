@@ -10,14 +10,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.data.xy.XYDataset;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
@@ -29,7 +27,7 @@ import org.jfree.util.ShapeUtilities;
  * scatter charts and the their respective regression lines.
  *
  * @author Maks Domas Smirnov, ID: ms8749c
- * @author rn6706a
+ * @author Roshaan Nazir, ID: rn6706a
  */
 public class Modelling implements ActionListener {
 
@@ -38,6 +36,7 @@ public class Modelling implements ActionListener {
     private TablesJFrame tables;
     private JComboBox xChosen;
     private ChartPanel chartDisplay;
+    private float[][] test;
 
     private ArrayList<Property> properties;
     private ArrayList<Property> comparisonProperties;
@@ -63,43 +62,56 @@ public class Modelling implements ActionListener {
                 readDataFromFile();
                 JOptionPane.showMessageDialog(null, "\"Training data set.txt\" has been successfully inputted!");
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(Modelling.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showMessageDialog(null, "The file has not been found.");
             }
         }
-
+        //Called if we want to add comparison data
         if (e.getActionCommand().equals("Comparison")) {
-            String[] options = {"Town A", "Town B", "Town C"};
+            String[] options = {"Town A", "Town B", "Town C", "Other?"};
             int choice = JOptionPane.showOptionDialog(null, ("Select a town"),
                     "Select a town", 0, 3, null, options, null);
             if (choice == 0) {
                 try {
                     readDataFromFile("Town A");
+                    JOptionPane.showMessageDialog(null, "Town A.txt successfully added");
                 } catch (FileNotFoundException ex) {
-                    Logger.getLogger(Modelling.class.getName()).log(Level.SEVERE, null, ex);
-
+                    JOptionPane.showMessageDialog(null, "File not Found");
                 }
             } else if (choice == 1) {
                 try {
                     readDataFromFile("Town B");
+                    JOptionPane.showMessageDialog(null, "Town B.txt successfully added");
                 } catch (FileNotFoundException ex) {
-                    Logger.getLogger(Modelling.class.getName()).log(Level.SEVERE, null, ex);
-
+                    JOptionPane.showMessageDialog(null, "File not Found");
                 }
             } else if (choice == 2) {
                 try {
                     readDataFromFile("Town C");
+                    JOptionPane.showMessageDialog(null, "Town C.txt successfully added");
                 } catch (FileNotFoundException ex) {
-                    Logger.getLogger(Modelling.class.getName()).log(Level.SEVERE, null, ex);
-
+                    JOptionPane.showMessageDialog(null, "File not Found");
+                }
+            } else if (choice == 3) {
+                String input = JOptionPane.showInputDialog("Enter the name of the file");
+                if (input == null || input == "") {
+                    JOptionPane.showMessageDialog(null, "Enter the name of the file");
+                } else {
+                    try {
+                        readDataFromFile(input);
+                        JOptionPane.showMessageDialog(null, input + ".txt successfully added");
+                    } catch (FileNotFoundException ex) {
+                        JOptionPane.showMessageDialog(null, "File not Found");
+                    }
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "File not Found");
             }
         }
-        // Table
+        //Called when we want to view the data tables
         if (e.getActionCommand().equals("Table")) {
             if (tables != null) {
+                JOptionPane.showMessageDialog(null, "Figures are given to an accuracy "
+                        + "of 6 decimal places. Trailing zeroes are disregarded");
                 tables.setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(null, "Please make sure you created a chart.");
@@ -113,11 +125,13 @@ public class Modelling implements ActionListener {
                 if (ds != null) {
                     XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
                     renderer.setSeriesLinesVisible(0, false);
+                    renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
                     JFreeChart chart
                             = ChartFactory.createXYLineChart("Your Chart",
                                     xChosen.getSelectedItem().toString(), "Price (£100,000's)", ds, PlotOrientation.VERTICAL, true, true,
                                     false);
                     XYPlot plot = (XYPlot) chart.getPlot();
+                    plot.getDomainAxis().setLowerBound(0);
                     plot.setRenderer(renderer);
                     chartDisplay.setChart(chart);
                     mainMenu.setVisible(true);
@@ -137,13 +151,14 @@ public class Modelling implements ActionListener {
                     XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
                     renderer.setSeriesLinesVisible(0, false);
                     renderer.setSeriesShapesVisible(1, false);
+                    renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
                     JFreeChart chart
                             = ChartFactory.createXYLineChart("Your Chart",
                                     xChosen.getSelectedItem().toString(), "Price (£100,000's)", ds, PlotOrientation.VERTICAL, true, true,
                                     false);
                     XYPlot plot = (XYPlot) chart.getPlot();
+                    plot.getDomainAxis().setLowerBound(0);
                     plot.setRenderer(renderer);
-
                     chartDisplay.setChart(chart);
                     mainMenu.setVisible(true);
                     tables = new TablesJFrame(this);
@@ -164,11 +179,10 @@ public class Modelling implements ActionListener {
                     if (value <= 0) {
                         throw new Exception();
                     }
-
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Please input a positive number.");
                 }
-                // Check if the value is postive.
+                // Check if the value is a postive number.
                 if (value > 0) {
                     XYSeriesCollection ds = createDatasetPrediction(xChosen.getSelectedIndex(), value);
                     if (ds != null) {
@@ -176,13 +190,14 @@ public class Modelling implements ActionListener {
                         renderer.setSeriesLinesVisible(0, false);
                         renderer.setSeriesShapesVisible(1, false);
                         renderer.setSeriesLinesVisible(2, false);
+                        renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
                         JFreeChart chart
                                 = ChartFactory.createXYLineChart("Your Chart",
                                         xChosen.getSelectedItem().toString(), "Price (£100,000's)", ds, PlotOrientation.VERTICAL, true, true,
                                         false);
                         XYPlot plot = (XYPlot) chart.getPlot();
+                        plot.getDomainAxis().setLowerBound(0);
                         plot.setRenderer(renderer);
-
                         chartDisplay.setChart(chart);
                         mainMenu.setVisible(true);
                         tables = new TablesJFrame(this);
@@ -196,7 +211,7 @@ public class Modelling implements ActionListener {
                 JOptionPane.showMessageDialog(null, "Please add data through keyboard or read in a file first.");
             }
         }
-
+        //Called when the user wants to plot comparison data with training data
         if (e.getActionCommand().equals("ComparisonChart")) {
             // Check if there is any data at all
             if (!properties.isEmpty() && !comparisonProperties.isEmpty()) {
@@ -206,7 +221,7 @@ public class Modelling implements ActionListener {
                     renderer.setSeriesLinesVisible(0, false);
                     renderer.setSeriesShapesVisible(1, false);
                     renderer.setSeriesLinesVisible(2, false);
-
+                    renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
                     JFreeChart chart
                             = ChartFactory.createXYLineChart("Your Chart",
                                     xChosen.getSelectedItem().toString(),
@@ -216,6 +231,7 @@ public class Modelling implements ActionListener {
                     renderer.setSeriesShape(1, point);
                     renderer.setSeriesShape(2, point);
                     XYPlot plot = (XYPlot) chart.getPlot();
+                    plot.getDomainAxis().setLowerBound(0);
                     plot.setRenderer(renderer);
                     chartDisplay.setChart(chart);
                     mainMenu.setVisible(true);
@@ -226,7 +242,6 @@ public class Modelling implements ActionListener {
                 JOptionPane.showMessageDialog(null, "Please ensure training data and comparison data are inputted.");
             }
         }
-
         //Called if we want to plot a scatter chart with a regression line and a prediction.
         if (e.getActionCommand().equals("BestMeasure")) {
             // Check if there is any data at all
@@ -237,13 +252,14 @@ public class Modelling implements ActionListener {
                     renderer.setSeriesLinesVisible(0, false);
                     renderer.setSeriesShapesVisible(1, false);
                     renderer.setSeriesLinesVisible(2, false);
+                    renderer.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
                     JFreeChart chart
                             = ChartFactory.createXYLineChart("Your Chart",
                                     xChosen.getItemAt(getHighestCorrelationCoefficient()).toString(), "Price (£100,000's)", ds, PlotOrientation.VERTICAL, true, true,
                                     false);
                     XYPlot plot = (XYPlot) chart.getPlot();
+                    plot.getDomainAxis().setLowerBound(0);
                     plot.setRenderer(renderer);
-
                     chartDisplay.setChart(chart);
                     mainMenu.setVisible(true);
                     tables = new TablesJFrame(this);
@@ -251,6 +267,21 @@ public class Modelling implements ActionListener {
                 }
             } else {
                 JOptionPane.showMessageDialog(null, "Please ensure training data and comparison data are inputted.");
+            }
+        }
+        //Called if we want to view the correlation coefficients of every independent variable
+        if (e.getActionCommand().equals("correlationData")) {
+            if (!properties.isEmpty()) {
+                getHighestCorrelationCoefficient();
+                String text = "";
+                for (int i = 0; i < test.length; i++) {
+                    text += "Correlation for " + xChosen.getItemAt((int) test[i][0] + 1).toString()
+                            + " is: " + test[i][1] + "\r\n";
+                }
+                JOptionPane.showMessageDialog(null,
+                        "The independent variables with the correlation coefficients in ascending order are:\r\n\r\n" + text);
+            } else {
+                JOptionPane.showMessageDialog(null, "Please ensure you have added the training data");
             }
         }
     }
@@ -285,7 +316,8 @@ public class Modelling implements ActionListener {
         chartMenu.add(makeMenuItem("Training data with a regression line and comparison data", fnt, "ComparisonChart"));
         chartMenu.add(makeMenuItem("\"Best measure\" training data with a regression line and comparison data", fnt, "BestMeasure"));
         viewMenu.add(makeMenuItem("Data summary tables", fnt, "Table"));
-        
+        viewMenu.add(makeMenuItem("View correlation coefficients", fnt, "correlationData"));
+
         xChosen.setMaximumSize(new Dimension(500, 500));
         xChosen.setFont(fnt);
         xChosen.addActionListener(this);
@@ -619,6 +651,7 @@ public class Modelling implements ActionListener {
                     Float.parseFloat(tmp[1]));
             Property.setIdCount(Property.getIdCount() + 1);
             properties.add(newProperty);
+
         }
     }
 
@@ -680,12 +713,15 @@ public class Modelling implements ActionListener {
                 }
             }
         }
+        //Storing the multi-dimensional array 'coeff' in to another 
+        //multi-dimensional array called 'test' in order to view correlation coefficients
+        test = coeff;
         return (int) coeff[0][0] + 1;
     }
 
     //The method reads in the chosen comparison data
     private void readDataFromFile(String town) throws FileNotFoundException {
-        //Read and store the lines into an ArrayList
+        //Read and store the lines into an ArrayList 
         Scanner scan = new Scanner(new File(town + ".txt"));
         ArrayList<String> list = new ArrayList<>();
         // Clear the ArrayList of old comparison data
@@ -738,5 +774,4 @@ public class Modelling implements ActionListener {
     public ArrayList<Property> getComparisonProperties() {
         return comparisonProperties;
     }
-
 }

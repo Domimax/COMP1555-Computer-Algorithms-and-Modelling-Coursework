@@ -2,14 +2,17 @@ package modelling;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 /**
  * A simple form to read in data through the keyboard.
  *
+ * @author Roshaan Nazir, ID: rn6706a
  * @author Maks Domas Smirnov, ID: ms8749c
  */
 public class KeyboardInputJFrame extends JFrame implements ActionListener {
@@ -60,7 +63,7 @@ public class KeyboardInputJFrame extends JFrame implements ActionListener {
         labelBedrooms.setBounds(50, 150, 200, 25);
         this.getContentPane().add(labelBedrooms);
 
-        JLabel labelAge = new JLabel("Age of propery:");
+        JLabel labelAge = new JLabel("Age of property:");
         labelAge.setBounds(50, 175, 200, 25);
         this.getContentPane().add(labelAge);
 
@@ -114,7 +117,11 @@ public class KeyboardInputJFrame extends JFrame implements ActionListener {
         //Stores the data in the arraylist of properties in the modelling class and deletes 
         //all associations to this form, so that the garbage collector can dispose of it
         if (e.getActionCommand().equals("Submit")) {
-            storeKeyboardInputData();
+            try {
+                storeKeyboardInputData();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Please ensure you are only entering positive numbers");
+            }
             this.setVisible(false);
             modelling.setForm(null);
             modelling = null;
@@ -122,45 +129,61 @@ public class KeyboardInputJFrame extends JFrame implements ActionListener {
     }
 
     // Method is used to store data inputted through the keyboard
-    private void storeKeyboardInputData() {
+    private void storeKeyboardInputData() throws NumberFormatException, IOException {
         Property newProperty = new Property(Property.getIdCount(), Float.parseFloat(getFieldBathrooms().getText()),
                 Float.parseFloat(getFieldAreaSite().getText()), Float.parseFloat(getFieldLivingSpace().getText()),
                 (float) Integer.parseInt(getFieldGarages().getText()), (float) Integer.parseInt(getFieldRooms().getText()),
                 (float) Integer.parseInt(getFieldBedrooms().getText()), (float) Integer.parseInt(getFieldAge().getText()),
                 Float.parseFloat(getFieldPrice().getText()));
-        Property.setIdCount(Property.getIdCount() + 1);
-        modelling.getProperties().add(newProperty);
+        if (newProperty.getNoOfBathroomsX1() >= 0 && newProperty.getSiteAreaX2() >= 0
+                && newProperty.getLivingSpaceX3() >= 0 && newProperty.getNoOfGaragesX4() >= 0
+                && newProperty.getNoOfRoomsX5() >= 0 && newProperty.getNoOfBedroomsX6() >= 0
+                && newProperty.getAgeX7() >= 0 && newProperty.getPriceY() >= 0) {
+            Property.setIdCount(Property.getIdCount() + 1);
+            modelling.getProperties().add(newProperty);
+        } else {
+            throw new IOException();
+        }
+
     }
 
     public JTextField getFieldBathrooms() {
+        // returns fieldBathrooms
         return fieldBathrooms;
     }
 
     public JTextField getFieldAreaSite() {
+        //returns fieldAreaSite
         return fieldAreaSite;
     }
 
     public JTextField getFieldLivingSpace() {
+        //returns fieldLivingSpace
         return fieldLivingSpace;
     }
 
     public JTextField getFieldGarages() {
+        //returns fieldGarages
         return fieldGarages;
     }
 
     public JTextField getFieldRooms() {
+        //returns fieldRooms
         return fieldRooms;
     }
 
     public JTextField getFieldBedrooms() {
+        //returns fieldBedrooms
         return fieldBedrooms;
     }
 
     public JTextField getFieldAge() {
+        //returns fieldAge
         return fieldAge;
     }
 
     public JTextField getFieldPrice() {
+        //returns fieldPrice
         return fieldPrice;
     }
 }

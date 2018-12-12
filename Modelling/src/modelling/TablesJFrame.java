@@ -5,7 +5,9 @@
  */
 package modelling;
 
-import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -16,23 +18,31 @@ import javax.swing.table.TableModel;
 
 /**
  *
- * @author rn6706a
+ * The class displays tabular data summary in 4 different tables, as required by
+ * the coursework specification.
+ *
+ * @author Roshaan Nazir, ID: rn6706a
+ * @author Maks Domas Smirnov, ID: ms8749c
  */
 public class TablesJFrame extends JFrame {
 
     private Modelling modelling;
+    private DecimalFormat format;
 
     public TablesJFrame(Modelling modelling) {
         this.modelling = modelling;
     }
 
+    //creating tables from training data set
     public void createTables(int chosenXID) {
+        format = new DecimalFormat("#.######");
+        format.setRoundingMode(RoundingMode.CEILING);
         // This ArrayList will store all the values of a chosen independent variable.
         ArrayList<Float> chosen = new ArrayList<>();
         ArrayList<Float> price = new ArrayList<>();
         String name = "";
         // A switch statement to determine which independant variable was selected
-        // from the JComboBox to create a chart.
+        // from the JComboBox to create a chart. For loops to populate the above arraylists
         switch (chosenXID) {
             case 0:
                 chosen = null;
@@ -88,86 +98,102 @@ public class TablesJFrame extends JFrame {
                 }
                 break;
         }
+        //check if there is any data
         if (chosen != null) {
-
             RegressionAlgorithm ra = new RegressionAlgorithm();
+            //Initialising the first table and populating it with values obtained 
+            //from regression and modelling class
             Object columns[] = {" ", "X - " + name, "Y - Price (100000's £)"};
-            Object rows[][] = {{"N", chosen.size(), price.size()}, {"Mean",
-                ra.mean(chosen), ra.mean(price)},
-            {"Variance", ra.variance(chosen), ra.variance(price)},
-            {"Standard Deviation", ra.standardDeviation(chosen),
-                ra.standardDeviation(price)}};
-
+            Object rows[][] = {{"N", format.format(chosen.size()), format.format(price.size())}, {"Mean",
+                format.format(ra.mean(chosen)), format.format(ra.mean(price))},
+            {"Variance", format.format(ra.variance(chosen)), format.format(ra.variance(price))},
+            {"Standard Deviation", format.format(ra.standardDeviation(chosen)),
+                format.format(ra.standardDeviation(price))}};
+            //Adding the table to the JFrame
             TableModel model = new DefaultTableModel(rows, columns);
             JTable table1 = new JTable(model);
             JScrollPane scrollPane = new JScrollPane(table1,
-                    JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                    JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-            table1.setSize(400, 400);
-
-            setSize(1000, 1000);
-            setLayout(new BorderLayout());
-            add(scrollPane, BorderLayout.WEST);
-
+                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            table1.setSize(table1.getPreferredSize());
+            table1.setEnabled(false);
+            setExtendedState(JFrame.MAXIMIZED_BOTH);
+            setLayout(new FlowLayout());
+            add(scrollPane);
+            //Initialising the second table and populating it with values obtained 
+            //from regression and modelling class
             Object columns2[] = {" ", " "};
-            Object rows2[][] = {{"∑X", ra.sum(chosen)},
-            {"∑X^2", ra.sumSquares(chosen)},
-            {"∑Y", ra.sum(price)},
-            {"∑Y^2", (float) Math.pow(ra.sum(price), 2)},
-            {"∑XY", ra.sumSquares(chosen, price)}};
-
+            Object rows2[][] = {{"∑X", format.format(ra.sum(chosen))},
+            {"∑X^2", format.format(ra.sumSquares(chosen))},
+            {"∑Y", format.format(ra.sum(price))},
+            {"∑Y^2", format.format((float) Math.pow(ra.sum(price), 2))},
+            {"∑XY", format.format(ra.sumSquares(chosen, price))}};
+            //Adding the table to the JFrame
             TableModel model2 = new DefaultTableModel(rows2, columns2);
             JTable table2 = new JTable(model2);
             JScrollPane scrollPane2 = new JScrollPane(table2,
                     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            table2.setSize(400, 400);
-            add(scrollPane2, BorderLayout.EAST);
+            table2.setSize(table2.getPreferredSize());
+            table2.setEnabled(false);
+            add(scrollPane2);
             ra = new RegressionAlgorithm(chosen, price);
+            //Initialising the third table and populating it with values obtained 
+            //from regression and modelling class
             Object columns3[] = {"R", "R^2", "Slope", "Y intercept"};
-            Object rows3[][] = {{(float) Math.sqrt(ra.getR2()), ra.getR2(),
-                ra.getBeta1(), ra.getBeta0()}};
-
+            Object rows3[][] = {{format.format((float) Math.sqrt(ra.getR2())), format.format(ra.getR2()),
+                format.format(ra.getBeta1()), format.format(ra.getBeta0())}};
+            //Adding the table to the JFrame
             TableModel model3 = new DefaultTableModel(rows3, columns3);
             JTable table3 = new JTable(model3);
             JScrollPane scrollPane3 = new JScrollPane(table3,
                     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            table3.setSize(10, 10);
-            add(scrollPane3, BorderLayout.SOUTH);
-
+            table3.setSize(table3.getPreferredSize());
+            table3.setEnabled(false);
+            add(scrollPane3);
+            //Initialising the fourth table and populating it with values obtained 
+            //from regression and modelling class
             Object columns4[] = {"X - " + name, "Y - Price (100000's £)", "Forecasted Y",
                 "Standard error of estimate"};
             Object rows4[][] = new Object[28][4];
-
+            //Multi-dimensional array populated by performing regression algorithm on each item in the 
+            //arraylists, then storing those values into the table
             for (int i = 0; i < chosen.size(); i++) {
-                rows4[i][0] = chosen.get(i);
-                rows4[i][1] = price.get(i);
+                rows4[i][0] = format.format(chosen.get(i));
+                rows4[i][1] = format.format(price.get(i));
                 ra = new RegressionAlgorithm(chosen, price);
-                rows4[i][2] = ra.getBeta1() * chosen.get(i) + ra.getBeta0();
-                rows4[i][3] = (Object) Math.pow(ra.getBeta1() * chosen.get(i)
-                        + ra.getBeta0() - price.get(i), 2);
-
+                rows4[i][2] = format.format(ra.getBeta1() * chosen.get(i) + ra.getBeta0());
+                rows4[i][3] = format.format((Object) Math.sqrt(Math.pow(ra.getBeta1() * chosen.get(i)
+                        + ra.getBeta0() - price.get(i), 2)));
             }
+            //Adding the table to the JFrame
             TableModel model4 = new DefaultTableModel(rows4, columns4);
             JTable table4 = new JTable(model4);
             JScrollPane scrollPane4 = new JScrollPane(table4,
                     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            table4.setSize(400, 400);
-            add(scrollPane4, BorderLayout.NORTH);
+            table4.setSize(table4.getPreferredSize());
+            table4.setEnabled(false);
+            add(scrollPane4);
             setLocationRelativeTo(null);
         }
     }
-
+    //creating tables from comparison data set
     public void createTablesComparison(int chosenXID) {
+        format = new DecimalFormat("#.######");
+        format.setRoundingMode(RoundingMode.CEILING);
         // This ArrayList will store all the values of a chosen independent variable.
+        //for the training data
         ArrayList<Float> chosen = new ArrayList<>();
+        //This arraylist will store all the values of a chosen independent variable
+        //for the comparison data
         ArrayList<Float> comparisonChosen = new ArrayList<>();
+        //This arraylist stores
         ArrayList<Float> price = new ArrayList<>();
         String name = "";
         // A switch statement to determine which independant variable was selected
-        // from the JComboBox to create a chart.
+        // from the JComboBox to create a chart. For loops to populate the above arraylists
         switch (chosenXID) {
             case 0:
                 chosen = null;
@@ -244,64 +270,74 @@ public class TablesJFrame extends JFrame {
                 }
                 break;
         }
+        //check if there is any data
         if (chosen != null) {
 
             RegressionAlgorithm ra = new RegressionAlgorithm();
+            //Initialising the first table and populating it with values obtained 
+            //from regression and property class
             Object columns[] = {" ", "X - " + name, "Y - Price (100000's £)"};
-            Object rows[][] = {{"N", chosen.size(), price.size()}, {"Mean",
-                ra.mean(chosen), ra.mean(price)},
-            {"Variance", ra.variance(chosen), ra.variance(price)},
-            {"Standard Deviation", ra.standardDeviation(chosen),
-                ra.standardDeviation(price)}};
-
+            Object rows[][] = {{"N", format.format(chosen.size()), format.format(price.size())}, {"Mean",
+                format.format(ra.mean(chosen)), format.format(ra.mean(price))},
+            {"Variance", format.format(ra.variance(chosen)), format.format(ra.variance(price))},
+            {"Standard Deviation", format.format(ra.standardDeviation(chosen)),
+                format.format(ra.standardDeviation(price))}};
+            //Adding the table to the JFrame
             TableModel model = new DefaultTableModel(rows, columns);
             JTable table1 = new JTable(model);
             JScrollPane scrollPane = new JScrollPane(table1,
                     JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                     JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
             table1.setSize(400, 400);
-
-            setSize(1000, 1000);
-            setLayout(new BorderLayout());
-            add(scrollPane, BorderLayout.WEST);
-
+            table1.setEnabled(false);
+            setSize(800, 800);
+            setLayout(new FlowLayout());
+            add(scrollPane);
+            //Initialising the second table and populating it with values obtained 
+            //from regression and properties class
             Object columns2[] = {" ", " "};
-            Object rows2[][] = {{"∑X", ra.sum(chosen)},
-            {"∑X^2", ra.sumSquares(chosen)},
-            {"∑Y", ra.sum(price)},
-            {"∑Y^2", (float) Math.pow(ra.sum(price), 2)},
-            {"∑XY", ra.sumSquares(chosen, price)}};
-
+            Object rows2[][] = {{"∑X", format.format(ra.sum(chosen))},
+            {"∑X^2", format.format(ra.sumSquares(chosen))},
+            {"∑Y", format.format(ra.sum(price))},
+            {"∑Y^2", format.format((float) Math.pow(ra.sum(price), 2))},
+            {"∑XY", format.format(ra.sumSquares(chosen, price))}};
+            //Adding the table to the JFrame
             TableModel model2 = new DefaultTableModel(rows2, columns2);
             JTable table2 = new JTable(model2);
             JScrollPane scrollPane2 = new JScrollPane(table2,
                     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             table2.setSize(400, 400);
-            add(scrollPane2, BorderLayout.EAST);
+            table2.setEnabled(false);
+            add(scrollPane2);
             ra = new RegressionAlgorithm(chosen, price);
+            //Initialising the third table and populating it with values obtained 
+            //from regression and properties class
             Object columns3[] = {"R", "R^2", "Slope", "Y intercept"};
-            Object rows3[][] = {{(float) Math.sqrt(ra.getR2()), ra.getR2(),
-                ra.getBeta1(), ra.getBeta0()}};
-
+            Object rows3[][] = {{format.format((float) Math.sqrt(ra.getR2())), format.format(ra.getR2()),
+                format.format(ra.getBeta1()), format.format(ra.getBeta0())}};
+            //Adding the table to the JFrame
             TableModel model3 = new DefaultTableModel(rows3, columns3);
             JTable table3 = new JTable(model3);
             JScrollPane scrollPane3 = new JScrollPane(table3,
                     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             table3.setSize(10, 10);
-            add(scrollPane3, BorderLayout.SOUTH);
-
+            table3.setEnabled(false);
+            add(scrollPane3);
+            //Initialising the fourth table and populating it with values obtained 
+            //from regression and properties class
             Object columns4[] = {"X - " + name, "Y - Price (100000's £)", "Forecasted Y",
                 "Standard error of estimate"};
             Object rows4[][] = new Object[chosen.size() + 1 + comparisonChosen.size()][4];
+            //Multi-dimensional array populated by performing regression algorithm on each item in the 
+            //arraylists, then storing those values into the table
             for (int i = 0; i < chosen.size(); i++) {
-                rows4[i][0] = chosen.get(i);
-                rows4[i][1] = modelling.getProperties().get(i).getPriceY();
-                rows4[i][2] = ra.getBeta1() * chosen.get(i) + ra.getBeta0();
-                rows4[i][3] = (Object) Math.sqrt(Math.pow(ra.getBeta1() * chosen.get(i)
-                        + ra.getBeta0() - modelling.getProperties().get(i).getPriceY(), 2));
-
+                rows4[i][0] = format.format(chosen.get(i));
+                rows4[i][1] = format.format(modelling.getProperties().get(i).getPriceY());
+                rows4[i][2] = format.format(ra.getBeta1() * chosen.get(i) + ra.getBeta0());
+                rows4[i][3] = format.format((Object) Math.sqrt(Math.pow(ra.getBeta1() * chosen.get(i)
+                        + ra.getBeta0() - modelling.getProperties().get(i).getPriceY(), 2)));
             }
             rows4[chosen.size()][0] = "Comparison X - " + name;
             rows4[chosen.size()][1] = "Comparison Y - Price (100000's £)";
@@ -309,20 +345,21 @@ public class TablesJFrame extends JFrame {
             rows4[chosen.size()][3] = "Standard error of estimate";
 
             for (int i = chosen.size() + 1; i < chosen.size() + 1 + comparisonChosen.size(); i++) {
-                rows4[i][0] = comparisonChosen.get(i - (chosen.size() + 1));
-                rows4[i][1] = modelling.getComparisonProperties().get(i - (chosen.size() + 1)).getPriceY();
-                rows4[i][2] = ra.getBeta1() * comparisonChosen.get(i - (chosen.size() + 1)) + ra.getBeta0();
-                rows4[i][3] = (Object) Math.sqrt(Math.pow(ra.getBeta1() * comparisonChosen.get(i - (chosen.size() + 1))
-                        + ra.getBeta0() - modelling.getComparisonProperties().get(i - (chosen.size() + 1)).getPriceY(), 2));
+                rows4[i][0] = format.format(comparisonChosen.get(i - (chosen.size() + 1)));
+                rows4[i][1] = format.format(modelling.getComparisonProperties().get(i - (chosen.size() + 1)).getPriceY());
+                rows4[i][2] = format.format(ra.getBeta1() * comparisonChosen.get(i - (chosen.size() + 1)) + ra.getBeta0());
+                rows4[i][3] = format.format((Object) Math.sqrt(Math.pow(ra.getBeta1() * comparisonChosen.get(i - (chosen.size() + 1))
+                        + ra.getBeta0() - modelling.getComparisonProperties().get(i - (chosen.size() + 1)).getPriceY(), 2)));
             }
-
+            //Adding the table to the JFrame
             TableModel model4 = new DefaultTableModel(rows4, columns4);
             JTable table4 = new JTable(model4);
             JScrollPane scrollPane4 = new JScrollPane(table4,
                     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             table4.setSize(400, 400);
-            add(scrollPane4, BorderLayout.NORTH);
+            table4.setEnabled(false);
+            add(scrollPane4);
             setLocationRelativeTo(null);
         }
     }

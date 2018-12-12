@@ -8,6 +8,7 @@ import java.util.ArrayList;
  * using the provided data sets.
  *
  * @author Maks Domas Smirnov, ID: ms8749c
+ * @author Roshaan Nazir, ID: rn6706a
  */
 public class RegressionAlgorithm {
 
@@ -52,6 +53,7 @@ public class RegressionAlgorithm {
         return sum;
     }
 
+    // The method finds the sum of all values in an ArrayList.
     public float sum(ArrayList<Float> data) {
         float sum = 0;
         for (int i = 0; i < data.size(); i++) {
@@ -60,6 +62,7 @@ public class RegressionAlgorithm {
         return sum;
     }
 
+    // The method finds the sum of all squared values in an ArrayList.
     public float sumSquares(ArrayList<Float> data) {
         float sum = 0;
         for (int i = 0; i < data.size(); i++) {
@@ -68,6 +71,8 @@ public class RegressionAlgorithm {
         return sum;
     }
 
+    // The method finds the sum of all values of an arraylist multiplied by the 
+    // corresponding values from another ArrayList.
     public float sumSquares(ArrayList<Float> data1, ArrayList<Float> data2) {
         float sum = 0;
         for (int i = 0; i < data1.size(); i++) {
@@ -88,6 +93,7 @@ public class RegressionAlgorithm {
                 / (sumOfSquares(dataXi, dataXi) * sumOfSquares(dataY, dataY));
     }
 
+    // The method finds the variance of the values in an ArayList.
     public float variance(ArrayList<Float> data) {
         float sum = 0;
         for (int i = 0; i < data.size(); i++) {
@@ -96,19 +102,23 @@ public class RegressionAlgorithm {
         return sum / data.size();
     }
 
+    // The method finds the standard deviation of the values in an ArayList.
     public float standardDeviation(ArrayList<Float> data) {
         return (float) sqrt(variance(data));
     }
 
     public float getBeta1() {
+        //returns beta1
         return beta1;
     }
 
     public float getBeta0() {
+        //returns beta0
         return beta0;
     }
 
     public float getR2() {
+        //returns r2
         return r2;
     }
 }
